@@ -1,0 +1,592 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Java常用数据结构 | Gridea</title>
+<link rel="shortcut icon" href="https://cui36.github.io/favicon.ico?v=1664167399664">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cui36.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Java常用数据结构 | Gridea - Atom Feed" href="https://cui36.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Linked List
+
+Never lose control of the head pointer
+When deference, make sure it is not a NULL pointer
+
+Reverse LinkedLi..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://cui36.github.io">
+  <img class="avatar" src="https://cui36.github.io/images/avatar.png?v=1664167399664" alt="">
+  </a>
+  <h1 class="site-title">
+    Gridea
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Java常用数据结构
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-08-04
+              </span>
+              <span>
+                10 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h1 id="linked-list">Linked List</h1>
+<ol>
+<li>Never lose control of the head pointer</li>
+<li>When deference, make sure it is not a NULL pointer</li>
+</ol>
+<h2 id="reverse-linkedlist">Reverse LinkedList</h2>
+<pre><code>// iteration
+while (head != null) {
+            next = head.next; // 下一次使用
+            head.next = prev;
+            prev = head;
+            head = next;
+        }
+return prev;
+// recursive
+public ListNode reverse(ListNode head) {
+        // base case
+        if (head == null || head.next == null) return head;
+        ListNode newHead = reverse(head.next);
+        // newHead.next = head;  // 注意此时newHead是旧表的尾部，所以需要用下面的表达式
+         head.next.next = head;
+        head.next = null;
+        return newHead;
+     }
+// 需要注意的是，两种reverse都没有额外的空间消耗，所以head已经改变
+</code></pre>
+<h1 id="queuefifo">Queue(FIFO)</h1>
+<ol>
+<li>Java API：<br>
+(1) offer(): offer at tail<br>
+(2) poll(): poll at head<br>
+(3) peek(): look at head without polling it out<br>
+(4) Queue<Integer> queue_sample = new ArrayDeque<Inetegr>();</li>
+<li>Usage:<br>
+(1) BFS相关问题<br>
+(2) Tree printout by level<br>
+(3) Sliding windows problems</li>
+</ol>
+<h1 id="stacklifo">Stack(LIFO)</h1>
+<ol>
+<li>Java API (use deque):<br>
+(1) offerFirst()<br>
+(2) pollFirst()<br>
+(3) peekFirst()<br>
+(4) Deque<Integer> stack_sample = new LinkedList<Integer>();</li>
+<li>done at top of the stack</li>
+<li>特性：<br>
+(1) Stack1到Stack2，元素顺序完全reverse<br>
+(2) Stack1 move到Stack2，然后部分元素move回S1，顺序不变</li>
+</ol>
+<h1 id="deque">Deque</h1>
+<ol>
+<li>Java API<br>
+(1) offerLast() : add tail of the deque, rightAdd()<br>
+(2) offerFirst() : add beginning of the deque, leftAdd()<br>
+(3) pollFirst() : return the head element, leftRemove()<br>
+(4) pollLast() : return the tail element, ritghRemove()</li>
+</ol>
+<h1 id="binary-tree">Binary Tree</h1>
+<blockquote>
+<p>Definition</p>
+</blockquote>
+<pre><code>public class TreeNode {
+        int key;
+        TreeNode left;
+        TreeNode right;
+        TreeNode parent;
+        public TreeNode(int key) {
+            this.key = key;
+        }
+    }
+</code></pre>
+<h2 id="树的遍历三种遍历相对于root的位置而言">树的遍历（三种遍历相对于root的位置而言）</h2>
+<h3 id="pre-order自己leftright">Pre-order(自己，left，right)</h3>
+<pre><code>public void preOrder(TreeNode root, List&lt;Integer&gt; res) {
+        if (root == null) return ;
+        res.add(root.key);
+        preOrder(root.left, res);
+        preOrder(root.right, res);
+    }
+</code></pre>
+<h3 id="in-orderleft自己right">In-order(left,自己,right)</h3>
+<pre><code>public void inOrder(TreeNode root, List&lt;Integer&gt; res) {
+        if (root == null) return ;
+        inOrder(root.left, res);
+        res.add(root.key);
+        inOrder(root.right, res);
+    }
+</code></pre>
+<h3 id="post-orderleft-right-自己">Post-order(left, right, 自己)</h3>
+<pre><code>public void postOrder(TreeNode root, List&lt;Integer&gt; res) {
+        if (root == null) return;
+        postOrder(root.left, res);
+        postOrder(root.right, res);
+        res.add(root.key);
+    }
+</code></pre>
+<h2 id="常见的特殊的tree">常见的特殊的Tree</h2>
+<h3 id="balance-tree">Balance Tree</h3>
+<ol>
+<li>Math.abs(leftH - rightH) &lt;= 1</li>
+<li>Height of a node = Max(leftH, rightH) + 1</li>
+</ol>
+<h3 id="complete-binary-tree">Complete Binary Tree</h3>
+<ol>
+<li>every level except the last, are completely filled(1~n-1层都是满的，最后一层是lean to left) VS full binary tree: 没有度为1的节点</li>
+<li>一定是Balance Tree</li>
+<li>heap based on it</li>
+</ol>
+<h3 id="binary-search-treebst">Binary Search Tree(BST)</h3>
+<ol>
+<li>(the left subtree value) &lt; value &lt; (the right subtree value)</li>
+<li>in-order print, it is an asending order</li>
+</ol>
+<blockquote>
+<p>Delete in a BST</p>
+</blockquote>
+<pre><code>public TreeNode deleteTree(TreeNode root, int key) {
+    if (root == null) {
+        return null;
+    }
+    if (root.key == key) {
+        if (root.left == null) return root.right;
+        else if (root.right == null) return root.left;
+        else if (root.right.left == null) { // 先判断右子树的左子树比判断左子树的右子树更好，因为此时可以直接迁移
+            root.right.left = root.left;
+            return root.right; 
+        }
+    }
+}
+</code></pre>
+<h1 id="heap">heap</h1>
+<blockquote>
+<ol>
+<li>优先队列</li>
+<li>binary tree based (complete binary tree) &amp; array</li>
+<li>堆序性，min heap: the parernt node is always &lt;= tow child nodes（直上直下的关系）</li>
+</ol>
+</blockquote>
+<h2 id="java-api">java API</h2>
+<ol>
+<li>PriorityQueue<Integer> minHeap = new PriorityQueue<Integer>();</li>
+<li>对元素的操作：offer(), peek(), poll()</li>
+</ol>
+<h2 id="性质">性质</h2>
+<ol>
+<li>通过二叉堆实现，所以是一棵完全二叉树</li>
+<li>堆序性：任意节点小于当前节点（ROOT = MIN HEAP）</li>
+<li>index of lchild = index * 2 + 1</li>
+<li>index of rchild = index * 2 + 2</li>
+<li>index of parent = (index  - 1) / 2</li>
+</ol>
+<h2 id="minheap-与-maxheap">MinHeap 与 MaxHeap</h2>
+<h3 id="comparatable-interface默认正序从小到大">Comparatable interface(默认正序从小到大)</h3>
+<blockquote>
+<p>对内排序的接口</p>
+</blockquote>
+<pre><code>interface Comparable&lt;E&gt; {
+        int compareTo(E ele);
+}
+e.g.
+class Integer implements Comparable&lt;Integer&gt; {
+        private int value;
+        public Integer(int value) {
+            this.value = value;
+        }
+        @Override
+        public int compareTo(Integer another) {
+            if (this.value == another.value) return 0;
+            return this.value &lt; another.value ? -1 : 1; // return -1, this 小； 1， this大; natural order
+        }
+    }
+
+// 使用Comparable来反序
+public class MyInteger implements Comparable&lt;MyInteger&gt; {
+        public int value;
+        public MyInteger(int value) {
+            this.value = value;
+        }
+        @Override
+        public int compareTo(MyInteger o) {
+            if(this.value == o.value) return 0;
+            return this.value &gt; o.value ? -1 : 1;
+        }
+    }
+PriorityQueue&lt;MyInteger&gt; Maxheap = new PriorityQueue&lt;&gt;(); // 调用
+'''
+### Comparator object
+&gt; 对外排序的接口
+'''
+interface Comparator&lt;E&gt; {
+        int compare(E o1, E o2);
+}
+public class Cell implements Comparable&lt;Cell&gt; {
+        public int row;
+        public int col;
+        public int value;
+        public Cell(int row, int col, int value) {
+            this.row = row;
+            this.col = col;
+            this.value = value;
+        }
+        @Override
+        public int compareTo(Cell o) {
+            if(this.value == o.value) return 0;
+            return this.value &lt; o.value ? -1 : 1;
+        }
+    }
+    public class MyComparator implements Comparator&lt;Cell&gt; {
+        @Override
+        public int compare(Cell o1, Cell o2) {
+            if (o1.value == o2.value)   return 0;
+            return o1.value &lt; o2.value ? -1 : 1;
+        }
+    }
+PriorityQueue&lt;Cell&gt; minHeap = new PriorityQueue&lt;Cell&gt;();
+PriorityQueue&lt;Cell&gt; maxHeap = new PriorityQueue&lt;&gt;(new MyComparator());
+or: PriorityQueue&lt;Cell&gt; maxHeap = new PriorityQueue&lt;&gt;(Collections.reverseOrder()); 
+
+// 使用Comparator来反序
+// 第一种：non-static nested class, belong to instance
+public class MyComparator implements Comparator&lt;MyInteger&gt; {
+        @Override
+        public int compare(MyInteger o1, MyInteger o2) {
+//            if (o1.value == o2.value)   return 0;
+//            return o1.value &lt; o2.value ? -1 : 1;
+            return Integer.valueOf(o2.value).compareTo(o1.value);
+        }
+    }
+PriorityQueue&lt;MyInteger&gt; MaxHeap = new PriorityQueue&lt;&gt;(new MyComparator());
+// 第二种: static nested class, belong to class
+public class MyInteger {
+        public int value;
+        public MyInteger(int value) {
+            this.value = value;
+        }
+        static class MyComparator implements Comparator&lt;MyInteger&gt; {
+            @Override
+            public int compare(MyInteger o1, MyInteger o2) {
+                if (o1.value == o2.value)   return 0;
+                return o1.value &gt; o2.value ? -1 : 1;
+            }
+        }
+    }
+PriorityQueue&lt;MyInteger&gt; MaxHeap = new PriorityQueue&lt;MyInteger&gt;(new MyInteger.MyComparator());  // 
+</code></pre>
+<h2 id="implementing-heaps">implementing heaps</h2>
+<h3 id="percolateup">percolateUp()</h3>
+<ol>
+<li>what: element need to moved to maintain the heaps property, e.g. when offer a new element</li>
+<li>how: compare the current element with its parent, swap if smaller than parent, move it up utill does not need，如果小，就要上去</li>
+<li>when: offer(), update() -&gt; O(logn)</li>
+</ol>
+<h3 id="percolatedown">percolateDown()</h3>
+<ol>
+<li>what: the element need to move down, e.g.: when poll the root element from the heap</li>
+<li>how: compare the current with its children, swap(parent, smallest of the two children) if parent is bigger，如果大，就要下去，去最小的地方</li>
+<li>when: poll(), update() -&gt; O(logn); heapify() -&gt; O(n)</li>
+</ol>
+<h3 id="heapify">heapify()</h3>
+<ol>
+<li>what: convert an array into a heap in O(n) time</li>
+<li>how: (一个node左子树是堆，右子树也是堆，对其进行percolateDown，使得以其为node的整棵子树变为堆)<br>
+a. for each node has at least one child;<br>
+b. from bottom to the root, from right to left(就是按照array的倒序)<br>
+c. percolateDown()<br>
+d. the nodes needs to perform c is [0, n / 2 - 1]</li>
+</ol>
+<pre><code>private Comparator&lt;E&gt; comparator;
+    public heap(int[] array, Comparator&lt;E&gt; comparator) {
+        if (array == null || array.length &lt;= 1) {
+            throw new IllegalArgumentException(&quot;Input array cannot be null or empty!&quot;);
+        }
+        this.array = array;
+        size = array.length;
+        this.comparator = comparator;
+        heapify();
+    }
+    private void heapify() {
+        for (int i = size / 2 - 1; i &gt;= 0; i--) {
+            percolateDown(i);
+        }
+    }
+    // 无论是up还是down，都是对array进行的原地操作
+    public void percolateUp(int index) {
+        while (index &gt; 0) {
+            int parentIndex = (index - 1) / 2;
+            if (array[index] &lt; array[parentIndex]) {
+                swap(index, parentIndex);
+            } else {
+                break;
+            }
+            index = parentIndex; // note!!,记得更新节点
+        }
+    }
+    public void percolateDown(int index) {
+        while (index &lt;= size / 2 - 1) {
+            int leftChildIndex = index * 2 + 1;
+            int rightChildIndex = index * 2 + 2;
+            int swapCandidate = leftChildIndex;
+            if (rightChildIndex &lt;= size - 1 &amp;&amp; array[rightChildIndex] &lt; array[leftChildIndex]) {
+                swapCandidate = rightChildIndex;
+            }
+            if (array[index] &gt; array[swapCandidate]) {
+                swap(index, swapCandidate);
+            } else {
+                break;
+            }
+            index = swapCandidate; // note，记得更新节点
+        }
+    }
+    public int peek() {
+        return array[0];
+    }
+    public int poll() { // 将root value poll出来
+        int result = array[0];
+        array[0] = array[size - 1];
+        size --;  // note!
+        percolateDown(0);
+        return result;
+    }
+    public void offer(int newValue) { 
+        if (size == array.length) {
+            array = Arrays.copyOf(array, (int)(array.length * 1.5));
+        }
+        array[size] = newValue;
+        size ++;
+        percolateUp(size - 1);
+    }
+    public int update(int index, int newValue) {
+        if (index &lt; 0 || index &gt;= size) {
+            throw new ArrayIndexOutOfBoundsException(&quot;invalid index range&quot;);
+        }
+        int result = array[index];
+        array[index] = newValue;
+        if (newValue &gt; result) {
+            percolateDown(index);
+        } else {
+            percolateUp(index);
+        }
+        return result;
+    }
+</code></pre>
+<h1 id="set">Set</h1>
+<h2 id="hashset">HashSet</h2>
+<ol>
+<li>implement: Set<String> set = new HashSet&lt;&gt;();</li>
+</ol>
+<blockquote>
+<p>例题1:找到丢失的数字</p>
+</blockquote>
+<ol>
+<li>Method1: Set</li>
+<li>Method2:将数组与1～n异或</li>
+</ol>
+<h2 id="hashmap">HashMap</h2>
+<ol>
+<li>implement: Map&lt;String, Integer&gt; map = new HashMap&lt;&gt;();</li>
+</ol>
+<blockquote>
+<p>例题1: 找到list中出现的topK单词</p>
+</blockquote>
+<ol>
+<li>step1: Map&lt;key = string, value = int(出现次数)&gt; O(n) time</li>
+<li>step2: min Heap, as it is in-place algorithm</li>
+</ol>
+<h1 id="trie">Trie</h1>
+<blockquote>
+<p>a search tree</p>
+</blockquote>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#linked-list">Linked List</a>
+<ul>
+<li><a href="#reverse-linkedlist">Reverse LinkedList</a></li>
+</ul>
+</li>
+<li><a href="#queuefifo">Queue(FIFO)</a></li>
+<li><a href="#stacklifo">Stack(LIFO)</a></li>
+<li><a href="#deque">Deque</a></li>
+<li><a href="#binary-tree">Binary Tree</a>
+<ul>
+<li><a href="#%E6%A0%91%E7%9A%84%E9%81%8D%E5%8E%86%E4%B8%89%E7%A7%8D%E9%81%8D%E5%8E%86%E7%9B%B8%E5%AF%B9%E4%BA%8Eroot%E7%9A%84%E4%BD%8D%E7%BD%AE%E8%80%8C%E8%A8%80">树的遍历（三种遍历相对于root的位置而言）</a>
+<ul>
+<li><a href="#pre-order%E8%87%AA%E5%B7%B1leftright">Pre-order(自己，left，right)</a></li>
+<li><a href="#in-orderleft%E8%87%AA%E5%B7%B1right">In-order(left,自己,right)</a></li>
+<li><a href="#post-orderleft-right-%E8%87%AA%E5%B7%B1">Post-order(left, right, 自己)</a></li>
+</ul>
+</li>
+<li><a href="#%E5%B8%B8%E8%A7%81%E7%9A%84%E7%89%B9%E6%AE%8A%E7%9A%84tree">常见的特殊的Tree</a>
+<ul>
+<li><a href="#balance-tree">Balance Tree</a></li>
+<li><a href="#complete-binary-tree">Complete Binary Tree</a></li>
+<li><a href="#binary-search-treebst">Binary Search Tree(BST)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#heap">heap</a>
+<ul>
+<li><a href="#java-api">java API</a></li>
+<li><a href="#%E6%80%A7%E8%B4%A8">性质</a></li>
+<li><a href="#minheap-%E4%B8%8E-maxheap">MinHeap 与 MaxHeap</a>
+<ul>
+<li><a href="#comparatable-interface%E9%BB%98%E8%AE%A4%E6%AD%A3%E5%BA%8F%E4%BB%8E%E5%B0%8F%E5%88%B0%E5%A4%A7">Comparatable interface(默认正序从小到大)</a></li>
+</ul>
+</li>
+<li><a href="#implementing-heaps">implementing heaps</a>
+<ul>
+<li><a href="#percolateup">percolateUp()</a></li>
+<li><a href="#percolatedown">percolateDown()</a></li>
+<li><a href="#heapify">heapify()</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#set">Set</a>
+<ul>
+<li><a href="#hashset">HashSet</a></li>
+<li><a href="#hashmap">HashMap</a></li>
+</ul>
+</li>
+<li><a href="#trie">Trie</a></li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://cui36.github.io/post/hello-gridea/">
+              <h3 class="post-title">
+                Hello Gridea
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://cui36.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

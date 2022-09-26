@@ -1,0 +1,280 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>编程小tips | Gridea</title>
+<link rel="shortcut icon" href="https://cui36.github.io/favicon.ico?v=1664167399664">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cui36.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="编程小tips | Gridea - Atom Feed" href="https://cui36.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="指针
+快慢指针
+
+借助速率相差一倍的特性，找到linkedlist中间元素
+
+node getMiddle(node h) {
+        if (h == null || h.next == null) {
+            r..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://cui36.github.io">
+  <img class="avatar" src="https://cui36.github.io/images/avatar.png?v=1664167399664" alt="">
+  </a>
+  <h1 class="site-title">
+    Gridea
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              编程小tips
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-08-09
+              </span>
+              <span>
+                3 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h1 id="指针">指针</h1>
+<h2 id="快慢指针">快慢指针</h2>
+<blockquote>
+<p>借助速率相差一倍的特性，找到linkedlist中间元素</p>
+</blockquote>
+<pre><code>node getMiddle(node h) {
+        if (h == null || h.next == null) {
+            return h;
+        }
+        node slow = head, fast = head;
+        while (fast.next != null &amp;&amp; fast.next.next != null) { // 按照步数依此判断，只有当近的有效，远的才不会出现npe
+            slow = slow.next; // 日拱一卒
+            fast = fast.next.next;  // 日拱两卒
+        }
+        return slow;
+    }
+</code></pre>
+<blockquote>
+<p>判断是否有环</p>
+</blockquote>
+<pre><code>public boolean hasCycle(ListNode head) {
+        if (head == null || head.next == null) return false;
+        ListNode slow = head, fast = head;
+        while (fast.next != null &amp;&amp; fast.next.next != null) {   // &amp;&amp; 前后的顺序不能变
+            fast = fast.next.next;
+            slow = slow.next;
+            if (fast == slow) return true;
+        }
+        return false;
+    }
+</code></pre>
+<h2 id="dummy-head">Dummy head</h2>
+<blockquote>
+<p>not must, but sometime handy</p>
+</blockquote>
+<ol>
+<li>the head could be changed</li>
+<li>not sure which node will be head</li>
+</ol>
+<blockquote>
+<p>merge two Sorted array</p>
+</blockquote>
+<pre><code>public ListNode merge(ListNode one, ListNode two) {
+        if (one == null) return two;
+        if (two == null) return one;
+        ListNode dummyHead = new ListNode(0);
+        ListNode curr = dummyHead;
+        while (one != null &amp;&amp; two != null) { // note! not .next
+            if (one.value &lt; two.value) {
+                curr.next = one;
+                one = one.next;
+            } else {
+                curr.next = two;
+                two = two.next;
+            }
+            curr = curr.next; // note! need to Accelerator
+        }
+        if (one != null) { // note! if not while
+            curr.next = one;
+        }
+        if (two != null) {
+            curr.next = two;
+        }
+        return dummyHead.next;
+    }
+</code></pre>
+<blockquote>
+<p>reorder the linkedlist<br>
+1）需要找到middle node，然后reverse剩下部分<br>
+2）一分为二，一次从前半部分插，一次从后半部分插<br>
+double duume head : partition the linkedlist, small -&gt; large<br>
+1）本题是dummyhead的集大成，定义dummyhead一定要定义curr Node，每次都要移动<br>
+2）注意给某些链表结尾赋值null</p>
+</blockquote>
+<blockquote></blockquote>
+<h1 id="iteration-vs-recursive">iteration VS recursive</h1>
+<blockquote>
+<p>我们知道，循环在一定程度上可以等价于递归，但是两者在使用场景仍有区别</p>
+</blockquote>
+<ol>
+<li>iteration: 当在数组中遍历时，一般采用此种方法；</li>
+<li>recursive的本质是寻找更小的子集，所以此种方法更适用于linked list，因为array的特性是通过下表访问而无法分别表示数组中的两个子数组，而linked list则不一样，可以通过不同头尾指针的设定确定新的list</li>
+</ol>
+<h1 id="多指针问题">多指针问题</h1>
+<ol>
+<li>多指针问题多用于划分区域，可起到挡板的作用</li>
+<li>在循环体内的控制条件，一般用 &lt;=， 而不用 !=, 因为有可能一次移动两个位置使得指针永远不想等从而越界</li>
+<li>经典二分问题，其循环体内也是&lt;=, mid = left + (right - left) / 2，即最后left = right； 但是二分的变种不一定保证其循环体内的控制条件，有可能是&lt;，即left与right差一个元素的位置, 要根据题目意思来定；</li>
+</ol>
+<h1 id="java有用的api">Java有用的API</h1>
+<ol>
+<li>表示 double(0.0, 1.0]的随机数，Math.random()</li>
+<li>数组容量不够需要扩充数组，此时需要数组的复制操作<pre><code> if (size == array.length) {
+         array = Arrays.copyOf(array, (int)(array.length * 1.5));
+     }
+</code></pre>
+</li>
+</ol>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#%E6%8C%87%E9%92%88">指针</a>
+<ul>
+<li><a href="#%E5%BF%AB%E6%85%A2%E6%8C%87%E9%92%88">快慢指针</a></li>
+<li><a href="#dummy-head">Dummy head</a></li>
+</ul>
+</li>
+<li><a href="#iteration-vs-recursive">iteration VS recursive</a></li>
+<li><a href="#%E5%A4%9A%E6%8C%87%E9%92%88%E9%97%AE%E9%A2%98">多指针问题</a></li>
+<li><a href="#java%E6%9C%89%E7%94%A8%E7%9A%84api">Java有用的API</a></li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://cui36.github.io/post/sorting-problems/">
+              <h3 class="post-title">
+                Sorting Problems
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://cui36.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

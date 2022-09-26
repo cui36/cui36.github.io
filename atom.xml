@@ -1,0 +1,925 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://cui36.github.io</id>
+    <title>Gridea</title>
+    <updated>2022-09-26T04:43:28.016Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://cui36.github.io"/>
+    <link rel="self" href="https://cui36.github.io/atom.xml"/>
+    <subtitle>温故而知新</subtitle>
+    <logo>https://cui36.github.io/images/avatar.png</logo>
+    <icon>https://cui36.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2022, Gridea</rights>
+    <entry>
+        <title type="html"><![CDATA[String]]></title>
+        <id>https://cui36.github.io/post/string/</id>
+        <link href="https://cui36.github.io/post/string/">
+        </link>
+        <updated>2022-09-11T01:43:20.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>往往需要两个index来完成操作</p>
+</blockquote>
+<h1 id="de-duplication">De-duplication</h1>
+<h1 id="substring">SubString</h1>
+<h2 id="judge-whether-string-a-is-string-bs-substring">judge whether string A is string B's substring</h2>
+<blockquote>
+<p>Robin Carb: if we can hash the short string to a unique integer, the we can just compare each substring of s1's hashed value -&gt; O(m * n) -&gt; O(n)，之所以会降低，是因为将原来的字符串逐位匹配换成了滚动哈希算法，只需要计算头一个hash值，便可知道后续字符串的hash值<br>
+<img src="https://cui36.github.io/post-images/1663459182111.png" alt="" loading="lazy"></p>
+</blockquote>
+<pre><code>public int strstr(String large, String small) {
+       if (large.length() &lt; small.length()) return -1;
+       int targetHashValue = moduleHash(small);
+       int seedHashValue = moduleHash(large.substring(0, small.length()));
+       for (int i = 0; i &lt;= large.length() - small.length(); i++) {
+           if (seedHashValue == targetHashValue) {
+               for (int j = 0; j &lt; small.length(); j++) {
+                   if (large.charAt(i + j) != small.charAt(j)) {
+                       break;
+                   }
+                   return i; // note
+               }
+           }
+           if (i &lt; large.length() - small.length()) {
+               seedHashValue = ((seedHashValue - (large.charAt(i) - 'a') * (26 ^ (small.length() - 1) % 101)) * 26 + (large.charAt(i + small.length()) - 'a')) % 101;  // note
+               if (seedHashValue &lt; 0) {  // note
+                   seedHashValue += 101;
+               }
+           }
+       }
+       return -1;
+   }
+   public int moduleHash(String a) {
+       char[] temp = a.toCharArray();
+       int result = 0;
+       int size = temp.length - 1;
+       for (int i = 0; i &lt; temp.length; i++) {
+           result = (result * 26 + (a.charAt(i) - 'a')) % 101;
+       }
+       return result;
+   }
+</code></pre>
+<h1 id="reversal">Reversal</h1>
+<h2 id="字符串反转">字符串反转</h2>
+<p>定义一前一后两个index，交换，i &lt; j; 时间复杂度O(n)</p>
+<pre><code>public void reverse(char[] input, int start, int end) {
+        if (input.length &lt;= 1) {
+            return;
+        }
+        while (start &lt; end) {
+            swap(input, start++, end --);
+        }
+    }
+    public void swap(char[] array, int i, int j) {
+        char temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+</code></pre>
+<h2 id="整体反转但举步不动">整体反转但举步不动</h2>
+<blockquote>
+<p>I love yahoo trick -&gt; yahoo love I</p>
+</blockquote>
+<ol>
+<li>先整体反转</li>
+<li>在局部反转</li>
+</ol>
+<pre><code>public String reverseWords(String input) {
+        if (input == null || input.length() &lt;= 1) return input;
+        // reverse the whole string
+        char[] array = input.toCharArray(); // note
+        reverse(array, 0, input.length() - 1);
+        int start = 0;
+        // reverse the words separated
+        for (int i = 0; i &lt; input.length(); i++) {
+            char temp = array[i];
+            if (temp != ' ' &amp;&amp; (i == 0 || array[i - 1] == ' ')) {
+                start = i;
+            }
+            if (temp != ' ' &amp;&amp; (i == input.length() - 1 || array[i + 1] == ' ')) { // note
+                reverse(array, start, i);
+            }
+        }
+        return new String(array);
+    }
+</code></pre>
+<h2 id="char-shuffling">char shuffling</h2>
+<blockquote>
+<p>ABCDEFG1234567 -&gt; A1B2C3D4E5F6G7<br>
+朴素的做法是利用mergesort，不过我们也可以利用I love yahoo trick, time = O(nlogn), 将字符串分为四个区域，首先是前一半是字符，后一半是字母；然后是在前后两部分中再一分为二；所以现在是A、B、1、2四个区域，首先对B、1两个区域做trick，为A、1、B、2，然后在分别递归调用A1，B2，注意参数；直到right和left挨着结束</p>
+</blockquote>
+<pre><code>public char[] shuffling(char[] array) {
+       // 分为4个区域
+        int left = 0;
+        int right = array.length - 1;
+        convert(array, left, right);
+        return array;
+    }
+    public void convert(char[] array, int left, int right) {
+        if (right - left &lt;= 1) {
+            return;
+        }
+        int size = right - left + 1;
+        int mid = left + size / 2;
+        int leftMid = left + size / 4;
+        int rightMid = mid + size / 4;
+        reverse(array, leftMid, rightMid - 1);
+        reverse(array, leftMid, mid - 1);
+        reverse(array, mid, rightMid - 1);
+
+        convert(array, left, left + 2 * (leftMid - left) - 1); // -1是因为要将后一位变为当前位,对于左半部分递归
+        convert(array,left + 2 * (leftMid - left), right);
+    }
+</code></pre>
+<h1 id="char-remove">Char Remove</h1>
+<blockquote>
+<p>abc -&gt; (2) -&gt; bca<br>
+借鉴上一道题的做法，将字符串按照移动步数考虑成两部分然后I love yahoo trick</p>
+</blockquote>
+<h1 id="permutationuse-dfs">Permutation(use DFS)</h1>
+<p>&quot;abc&quot; -&gt; [abc, acb, bac, bca, cab, cba]</p>
+<pre><code>// 输出字符串的所有排列，且其有重复元素
+    public void permutation(char[] input, int index) {
+        if (index == input.length) { // base case
+            System.out.println(input);
+            return;
+        }
+        Set&lt;Character&gt; fixElementInThisLevel = new HashSet&lt;&gt;();
+        for (int i = index; i &lt; input.length; i++) {
+            if (fixElementInThisLevel.contains(input[i])) {
+                continue;
+            }
+            fixElementInThisLevel.add(input[i]);
+            swap(input, index, i);
+            permutation(input, index + 1);
+            swap(input, index, i);
+        }
+    }
+</code></pre>
+<h1 id="decodingencoding">Decoding/encoding</h1>
+<p>&quot;aaaaabbbc&quot; -&gt; &quot;a5b3c1&quot;</p>
+<blockquote>
+<p>注意事项：两次循环，第一遍将数组中出现次数大于等于两次的letter和及出现次数抄录下来，注意其出现次数可能超过一位数，所以对出现次数从后往前记录，比如23，先记录3，再记录2；然后出现一次的letter只记录字母；两者的length都要相应记录；<br>
+第二次循环处理只有字母的letter，加‘1’<img src="https://cui36.github.io/post-images/1663896634485.png" alt="" loading="lazy"></p>
+</blockquote>
+<pre><code>static private String compress(String input) {
+        // corner case
+        if (input == null || input.isEmpty()) {
+            return null;
+        }
+        char[] array = input.toCharArray();
+        // step1: deal with the cases that adjacent letter &gt;= 2
+        int fast = 0, slow = 0, newLength = 0;
+        while (fast &lt; array.length) {
+            int begin = fast;
+            while (fast &lt; array.length &amp;&amp; array[fast] == array[begin]) {
+                fast++;
+            }
+            array[slow++] = array[begin]; // 每次循环开始前先复制字符
+            if (fast - begin == 1) {
+                newLength += 2;  // a 1,一共两个字符，而且不变
+            } else {
+                int len = copyDigits(array, slow, fast - begin); // 计算大于2的字符数，返回其长度
+                slow += len; //  slow现在是最后一个位置的后一位
+                newLength += len + 1; // 数字位数 + 一个字符
+            }
+        }
+        // step2: deal with the single letter
+        char[] result = new char[newLength];
+        fast = slow - 1;
+        slow = newLength - 1;
+        while (fast &gt;= 0) {
+            if (Character.isDigit(array[fast])) {
+                while (fast &gt;= 0 &amp;&amp; Character.isDigit(array[fast])) {
+                    result[slow--] = array[fast--];
+                }
+            } else {
+                result[slow--] = '1';
+            }
+            result[slow--] = array[fast--];
+        }
+        return new String(result);
+    }
+    static public int copyDigits(char[] input, int index, int count) {
+        int len = 0;
+        for (int i = count; i &gt; 0 ; i /= 10) {
+            index++;
+            len++;
+        }
+        for (int i = count; i &gt; 0 ; i /= 10) {
+            int digit = i % 10;
+            input[--index] = (char) ('0' + digit);
+        }
+        return len;
+    }
+</code></pre>
+<blockquote>
+<p>如果是逆过程，注意处理0的情况</p>
+</blockquote>
+<h1 id="longest-substring">Longest substring</h1>
+<p>最长无重复字符的子序列：abcdea -&gt; abcde -&gt; 5</p>
+<blockquote>
+<p>采用滑动窗口的思想，设立slow，fast两个指针，每次遇见set中不包含的字符，则移动slow指针；遇见set中包含的字符，删去字符并移动slow</p>
+</blockquote>
+<pre><code>public int longest(String input) {
+        if (input == null || input.isEmpty()) {
+            return -1;
+        }
+        Set&lt;Character&gt; window = new HashSet&lt;&gt;();
+        int slow = 0, fast = 0, longest = 0;
+        while (fast &lt; input.length()) {
+            // if 出现重复的字符，删除第一个，并向后移动slow指针
+            if (window.contains(input.charAt(fast))) {
+                window.remove(input.charAt(slow++));
+            } else { // 若不然，滑动fast指针使其包含最远的字符
+                window.add(input.charAt(fast++));
+                longest = Math.max(longest, fast - slow);
+            }
+        }
+        return longest;
+    }
+</code></pre>
+<h1 id="matching">Matching</h1>
+<h2 id="allanagrams">allAnagrams</h2>
+<p>l = &quot;abcbac&quot;, s = &quot;ab&quot;, return [0, 3]</p>
+<blockquote>
+<p>为了使得时间复杂是O(n),此题仍采用滑动窗口来解决问题，并且不同于native的做法，我们将Map的值设为还缺多少个该字母，每次遇见新的，就将其值-1，match++；当当前指针超过lo字符串长度时，我们将进行窗口的移动，此时将窗口最左侧字符的map值+1，match--；每次循环结束如果match == map.size(),说明找到一个有效配对</p>
+</blockquote>
+<pre><code>static public List&lt;Integer&gt; allAnagrams(String sh, String lo) {
+        List&lt;Integer&gt; result = new ArrayList&lt;&gt;();
+        // corner case
+        if (lo == null || lo.length() == 0) {
+            return result;
+        }
+        if (lo.length() &lt; sh.length()) {
+            return result;
+        }
+        Map&lt;Character, Integer&gt; map = countMap(sh);
+        int match = 0;
+        for (int i = 0; i &lt; lo.length(); i++) {
+            char tmp = lo.charAt(i);
+            Integer count = map.get(tmp);
+            if (i &gt;= sh.length()) {
+                tmp = lo.charAt(i - sh.length());
+                count = map.get(tmp);
+                if (count != null) {
+                    map.put(tmp, count + 1);
+                    if (count == 0) {
+                        match--;
+                    }
+                }
+            }
+            tmp = lo.charAt(i);
+            count = map.get(tmp);
+            if (count != null) {
+                map.put(tmp, count - 1);
+                if (count == 1) {
+                    match++;
+                }
+            }
+
+            if (match == map.size()) {
+                result.add(i - sh.length() + 1);
+            }
+        }
+        return result;
+    }
+    static public Map&lt;Character, Integer&gt; countMap(String s) {
+        Map&lt;Character, Integer&gt; map = new HashMap&lt;&gt;();
+        for (char ch : s.toCharArray()) {
+            Integer count = map.get(ch);
+            if (count == null) {
+                map.put(ch, 1);
+            } else {
+                map.put(ch, ++count);
+            }
+        }
+        return map;
+    }
+</code></pre>
+<h2 id="longestconsecutiveones">longestConsecutiveOnes</h2>
+<p>flip 0s at index 2 and 3, then the array becomes [1,1,1,1,1,1,1,0,0,0], so that the length of longest subarray that contains only integer 1 is 7.</p>
+<blockquote>
+<p>High level: 对于每一个可能的window的fast index，是的slow与fast之间的字母不超过k个zero，找到最远的slow更新fast - slow + 1</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[三人行，必有我师]]></title>
+        <id>https://cui36.github.io/post/san-ren-xing-bi-you-wo-shi/</id>
+        <link href="https://cui36.github.io/post/san-ren-xing-bi-you-wo-shi/">
+        </link>
+        <updated>2022-09-06T16:36:03.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="与苏伊信学长一席谈202297">与苏伊信学长一席谈，2022.9.7</h1>
+<blockquote>
+<p>本来是去参加Bloomberg的研讨会，结果会议由大教室搬到了室外，从20度的坐票换到了35度的站票，心情自然不好受。到了广场已有百十位同学集结于此，拉着Engineer和HR谈天说地，我似一位局外人侧耳倾听，假装听懂，假装与我有关。但我生命短暂，时间有限，不能再晒太阳了！刚要去图书馆找康少，就遇见一位文质彬彬的亚洲面孔在和美国同学交谈着，侧耳倾听了会，这位亚洲面孔应该是研二，直系学长，我于是加入了群聊<br>
+“Are you guys graduate students as well?”<br>
+“Yes, this my second year ...... from China...” 等美国有人走后，我紧紧“抓住了”学长</p>
+</blockquote>
+<h2 id="关于interhsip">关于interhsip</h2>
+<ol>
+<li>投递时间：学长是今年1月投递，与运气有关，与形势有关。但是能早投递就早投递。</li>
+<li>关于如何投递？学长推荐的软件可以看看</li>
+<li>内推如何看？一般地里会回复更快，所以可以去地里看看</li>
+<li>关于面经：地里 -&gt; 公司 -&gt; 面经，一般可以刷到真题（Amazon面经概率极高）</li>
+<li>关于算法：多背模版，刷题会更快；图要多刷，DP可以掌握到中等（for Amazon only）；必刷题：75道，一定要熟练掌握</li>
+<li>可以和同学一起刷题</li>
+<li>最后一学期如果只选了一门学分，可以和学院商量实习，这样自己就有三段实习机会了</li>
+</ol>
+<h2 id="关于生活">关于生活</h2>
+<ol>
+<li>加州、湾区生活费确实高</li>
+<li>少刷B站，多刷Youtube</li>
+<li>能两年毕业尽量两年毕业，这样就有更多的时间干自己想要的事情</li>
+</ol>
+<h2 id="关于carrier-fair">关于Carrier fair</h2>
+<ol>
+<li>一定要早点来，问面试官自己想问的问题：您能介绍下公司吗？网上的sde和full stack有什么区别吗？这是我的简历，您觉得我更适合做什么呢？我还需要补充什么东西呢？自己打印，然后最后说这是我的简历，我可以不可以放在您这里呢？直接放着，后续发生什么就不管我们的事了
+<blockquote>
+<p>多听TED社交礼仪：如何问出自己想问的问题？如何更合适的表达？...</p>
+</blockquote>
+</li>
+<li>就算是不sponsor的也可以问他能不能实习</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Mac玩法]]></title>
+        <id>https://cui36.github.io/post/mac-wan-fa/</id>
+        <link href="https://cui36.github.io/post/mac-wan-fa/">
+        </link>
+        <updated>2022-09-05T09:40:41.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="vim">Vim</h1>
+<ol>
+<li>配置高亮和显示行数 https://blog.csdn.net/zizle_lin/article/details/81530311</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Graph]]></title>
+        <id>https://cui36.github.io/post/graph-search/</id>
+        <link href="https://cui36.github.io/post/graph-search/">
+        </link>
+        <updated>2022-08-28T04:35:02.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="graph核心思想总结">Graph核心思想总结</h1>
+<ol>
+<li>how to represent a Graph<br>
+a. 邻接矩阵 / 邻接表<br>
+b. List&lt;List<Integer>&gt;</li>
+<li>How to model a problem to graph problem: 构建点和边的关系</li>
+<li>key problem：traverse this graph by some way</li>
+<li>How many ways?</li>
+<li>考虑核心：去重</li>
+</ol>
+<h1 id="graph-search">Graph Search</h1>
+<pre><code>class GrapgNode {
+    int value;
+    string name;
+    ...
+    List&lt;GraphNode&gt; neighbors; 
+}
+</code></pre>
+<h2 id="bfs1">BFS1</h2>
+<blockquote>
+<p>适用问题：分层打印，同层关系<br>
+expand and generate,且每个node只能被poll一次且仅一次（可以用Hashset记录），不能重新generate<br>
+数据结构：Queue</p>
+</blockquote>
+<ol>
+<li>initial state(root)</li>
+<li>expand a node, poll, visit, print ...</li>
+<li>generate nodes: reach out to its neighboring nodes</li>
+<li>deduplicate: expand and generate for only once</li>
+</ol>
+<pre><code>（层序遍历）
+public List&lt;List&lt;Integer&gt;&gt; layerByLayer(TreeNode root) {
+        List&lt;List&lt;Integer&gt;&gt; result = new ArrayList&lt;List&lt;Integer&gt;&gt;();
+        if (root == null) return result;
+        Queue&lt;TreeNode&gt; helper = new LinkedList&lt;&gt;();
+        helper.offer(root);
+        // result.add(root.key);
+        while (!helper.isEmpty()) {
+            int size = helper.size();  // 每行的元素
+            List&lt;Integer&gt; layerNode = new ArrayList&lt;&gt;();
+            for (int i = 0; i &lt; size; i++) {
+                TreeNode curr = helper.poll();
+                if (curr.left != null) {
+                    helper.offer(curr.left);
+                }
+                if (curr.right != null) {
+                    helper.offer(curr.right);  // note! 是curr不是root
+                }
+                layerNode.add(curr.key);
+            }
+            result.add(layerNode);
+        }
+        return result
+</code></pre>
+<blockquote>
+<p>可以看出，如果有的例题需要利用BFS，先创建一个Queue，然后while循环条件是不为空，循环体内根据条件选择何时加入、何时poll队列中元素</p>
+</blockquote>
+<pre><code>// 判断是否是完全二叉树
+public boolean isCompleted(TreeNode root) {
+        if (root == null) return true; // null 和 单节点
+        boolean flag = false;  // flag代表any of its child is empty
+        Queue&lt;TreeNode&gt; dfs = new LinkedList&lt;&gt;();
+        dfs.offer(root);
+        while (!dfs.isEmpty()) {
+            TreeNode curr = dfs.poll();
+            if (curr.left == null) {
+                flag = true;
+            } else if (flag) { // 如果左子树不为空，且flag为空，代表之前层[1,n）有空的，不满足定义。注意我们是先判断的左子树，如果是该节点或之后节点有空子树将在之后判断，不满足这个if条件；
+                return false; 
+            } else {
+                dfs.offer(curr.left);
+            }
+            if (curr.right == null) {
+                flag = true;
+            } else if (flag) { // 右子树存在，但之前层有空的
+                return false;
+            } else {
+                dfs.offer(curr.right);
+            }
+        }
+        return true;
+    }
+// full true: 不能有度为1的节点
+while (!dfs.isEmpty()) {
+            TreeNode curr = dfs.poll();
+            if (curr.left == null) {
+                if (curr.right != null) {
+                    return false;
+                }
+            } else {
+                if (curr.right == null) {
+                    return false;
+                } else {
+                    dfs.offer(curr.left);
+                    dfs.offer(curr.right);
+                }
+            }
+        }
+</code></pre>
+<h2 id="best-first-search">Best First Search</h2>
+<blockquote>
+<p>适用问题：shortest path, min/max k elements<br>
+input a node, output the shortest path to all the rest nodes(点到面的算法) e.g. 北京到所有其他城市最短距离<br>
+数据结构：Priority Queue(与BFS唯一的区别，而且BFS一般要更遍历结束，但是BFS2不一定要将所有元素遍历完，如果不要遍历完，就直接for循环就好了，循环次数是除去循环外的一次后的k - 1)</p>
+</blockquote>
+<ol>
+<li>initial state: start node，有可能是数组第一个位置</li>
+<li>node expand and generate role, cost(node) = cost(parent node) + c(parent of node, node)
+<blockquote>
+<p>maintain a hashset &lt;'GraphNode'&gt; to mark whether the nodes has been generate before</p>
+</blockquote>
+</li>
+<li>end condition，所有点都遍历，即p_queue变空</li>
+<li>Dijkstra's algrothim property:<br>
+a. one node can be only expand once<br>
+b. one node can be generated more than once(re-caculate cost)<br>
+c. all the pop costs are non-decreasing<br>
+d. time complexity = O(E*logV)<br>
+e. when a node is poped out for expansion, the value is fixed from the start node</li>
+<li>deduplicate is important in this question: 一般方法是定义一个boolean[][] visited, 如果generated我们就将其中对应位置的元素设为true，而且在每次将新元素加入队列前需要判断是不是true</li>
+</ol>
+<pre><code>// 寻找数组中第k小的元素，且数组从左到右递增，从上到下递增
+public static class Cell {
+        int row;
+        int column;
+        int value;
+
+        Cell(int row, int column, int value) {
+            this.row = row;
+            this.column = column;
+            this.value = value;
+        }
+    }
+    public int kthSmallest(int[][] matrix, int k) {
+        int rows = matrix.length;
+        int columns = matrix[0].length;
+        PriorityQueue&lt;Cell&gt; minHeap = new PriorityQueue&lt;Cell&gt;(k, new Comparator&lt;Cell&gt;() { // 创建新的数据结构
+            @Override
+            public int compare(Cell o1, Cell o2) {
+                if (o1.value == o2.value) return 0;
+                return o1.value &lt; o2.value ? -1 : 1;
+            }
+        });
+        // set generated cell to justify whether it is generated before
+        boolean[][] visited = new boolean[rows][columns];
+        minHeap.offer(new Cell(0, 0, matrix[0][0]));
+        visited[0][0] = true;
+        for (int i = 0; i &lt; k - 1; i++) {
+            Cell cur = minHeap.poll();  // pop one element from at most 2* k p-queue, O(log2k)
+            // add its neighbors
+            // if not boundary &amp;&amp; if not generated before
+            if (cur.row + 1 &lt; rows &amp;&amp; !visited[cur.row + 1][cur.column]) {
+                minHeap.offer(new Cell(cur.row + 1, cur.column, matrix[cur.row + 1][cur.column])); // O(log2k)
+                visited[cur.row + 1][cur.column] = true;
+            }
+            if (cur.column + 1 &lt; columns &amp;&amp; !visited[cur.row][cur.column + 1]) {
+                minHeap.offer(new Cell(cur.row, cur.column + 1, matrix[cur.row][cur.column + 1]));
+                visited[cur.row][cur.column + 1] = true;
+            }
+        }
+        return minHeap.peek().value;
+    }
+// 时间复杂度一共是O(klogk)
+</code></pre>
+<h2 id="dfs">DFS</h2>
+<blockquote>
+<p>基本方法：画Recursion Tree</p>
+<ol>
+<li>每层代表什么意义？DFS有多少层？</li>
+<li>每层有几个状态/case？<br>
+Note：吃吐守恒定律，即回到母节点前，一定要还原成原始状态</li>
+</ol>
+</blockquote>
+<ol>
+<li>经典例题1：输出一个字符串内所有的字符排列组合方式Permutation</li>
+<li>Method: swap - swap,即每次都把一个元素固定在这一层该固定的位置上</li>
+<li>Recursion Tree: 每一层代表该固定的元素位置，[0, index] 表示固定好的区间，[index...array.length - 1]表示尚未确定位置，但是当层可以考虑被固定来的元素，index表示当层可以考虑第一个放过来的元素</li>
+</ol>
+<pre><code>public class Solution {
+  public List&lt;String&gt; permutations(String input) {
+    // Write your solution here
+    List&lt;String&gt; result = new ArrayList&lt;String&gt;(); 
+    DFS(input.toCharArray(), 0, result);
+    return result;
+  }
+  public void DFS(char[] input, int index, List&lt;String&gt; result) {
+    if (index == input.length) {
+      result.add(new String(input));
+      return;
+    }
+    for (int i = index; i &lt; input.length; i++) {
+      swap(input, index, i);
+      DFS(input, index + 1, result);
+      swap(input, index, i);
+    }
+  }
+  public void swap(char[] input, int i, int j) {
+    char tmp = input[i];
+    input[i] = input[j];
+    input[j] = tmp;
+  }
+} // O(n!)
+// 如果输入字符数组有重复元素，则可以设立一个set
+</code></pre>
+<h3 id="dfs-连通性">DFS 连通性</h3>
+<h3 id="dfs解决topological-order">DFS解决Topological order</h3>
+<h3 id="dfs解决图上的路径问题">DFS解决图上的路径问题</h3>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[LateX常用表达式]]></title>
+        <id>https://cui36.github.io/post/latex-chang-yong-biao-da/</id>
+        <link href="https://cui36.github.io/post/latex-chang-yong-biao-da/">
+        </link>
+        <updated>2022-08-27T10:51:57.000Z</updated>
+        <content type="html"><![CDATA[<ol>
+<li>\vspace{-4.0mm} 与下一行的距离</li>
+<li>\setlength\tabcolsep{1ex} 设置左边距</li>
+<li>设置字体时\fontsize{8.5pt}{1em} 分别是字体大小，行间距，如果要生效，需要加 \selectfont 关键字</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[About Java]]></title>
+        <id>https://cui36.github.io/post/about-java/</id>
+        <link href="https://cui36.github.io/post/about-java/">
+        </link>
+        <updated>2022-08-14T09:26:10.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="一些数组的定义">一些数组的定义</h1>
+<ol>
+<li>返回int型数组</li>
+</ol>
+<pre><code>return new int[]{thisLength, digit};
+</code></pre>
+<ol start="2">
+<li>初始化String数组</li>
+</ol>
+<pre><code>String str = new String(&quot;x2y0i0z3&quot;);
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[About interview]]></title>
+        <id>https://cui36.github.io/post/about-interview/</id>
+        <link href="https://cui36.github.io/post/about-interview/">
+        </link>
+        <updated>2022-08-13T09:10:32.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="讲解code-a-complete-answer-must-include">讲解code (a complete answer must include)</h1>
+<ol>
+<li>Document your assumptions</li>
+<li>Explain your approach and how to intent to solve</li>
+<li>Provide code comments, like <em>code frame</em></li>
+<li>Explain the complexity</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Coding small problem]]></title>
+        <id>https://cui36.github.io/post/coding-small-problem/</id>
+        <link href="https://cui36.github.io/post/coding-small-problem/">
+        </link>
+        <updated>2022-08-12T18:01:51.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="java-if-的作用域">Java if 的作用域</h1>
+<ol>
+<li>基本的：if 与 else if, else组合，其执行顺序没什么问题；</li>
+<li>当多个if相遇，其执行顺序是从上往下执行，当第一个if满足条件，如果其语句内有return，则结束；如果没有return，且之后的if条件亦满足，则均会执行；具体案例请见recursion中的调度；</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[编程小tips]]></title>
+        <id>https://cui36.github.io/post/bian-cheng-xiao-tips/</id>
+        <link href="https://cui36.github.io/post/bian-cheng-xiao-tips/">
+        </link>
+        <updated>2022-08-10T01:48:44.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="指针">指针</h1>
+<h2 id="快慢指针">快慢指针</h2>
+<blockquote>
+<p>借助速率相差一倍的特性，找到linkedlist中间元素</p>
+</blockquote>
+<pre><code>node getMiddle(node h) {
+        if (h == null || h.next == null) {
+            return h;
+        }
+        node slow = head, fast = head;
+        while (fast.next != null &amp;&amp; fast.next.next != null) { // 按照步数依此判断，只有当近的有效，远的才不会出现npe
+            slow = slow.next; // 日拱一卒
+            fast = fast.next.next;  // 日拱两卒
+        }
+        return slow;
+    }
+</code></pre>
+<blockquote>
+<p>判断是否有环</p>
+</blockquote>
+<pre><code>public boolean hasCycle(ListNode head) {
+        if (head == null || head.next == null) return false;
+        ListNode slow = head, fast = head;
+        while (fast.next != null &amp;&amp; fast.next.next != null) {   // &amp;&amp; 前后的顺序不能变
+            fast = fast.next.next;
+            slow = slow.next;
+            if (fast == slow) return true;
+        }
+        return false;
+    }
+</code></pre>
+<h2 id="dummy-head">Dummy head</h2>
+<blockquote>
+<p>not must, but sometime handy</p>
+</blockquote>
+<ol>
+<li>the head could be changed</li>
+<li>not sure which node will be head</li>
+</ol>
+<blockquote>
+<p>merge two Sorted array</p>
+</blockquote>
+<pre><code>public ListNode merge(ListNode one, ListNode two) {
+        if (one == null) return two;
+        if (two == null) return one;
+        ListNode dummyHead = new ListNode(0);
+        ListNode curr = dummyHead;
+        while (one != null &amp;&amp; two != null) { // note! not .next
+            if (one.value &lt; two.value) {
+                curr.next = one;
+                one = one.next;
+            } else {
+                curr.next = two;
+                two = two.next;
+            }
+            curr = curr.next; // note! need to Accelerator
+        }
+        if (one != null) { // note! if not while
+            curr.next = one;
+        }
+        if (two != null) {
+            curr.next = two;
+        }
+        return dummyHead.next;
+    }
+</code></pre>
+<blockquote>
+<p>reorder the linkedlist<br>
+1）需要找到middle node，然后reverse剩下部分<br>
+2）一分为二，一次从前半部分插，一次从后半部分插<br>
+double duume head : partition the linkedlist, small -&gt; large<br>
+1）本题是dummyhead的集大成，定义dummyhead一定要定义curr Node，每次都要移动<br>
+2）注意给某些链表结尾赋值null</p>
+</blockquote>
+<blockquote></blockquote>
+<h1 id="iteration-vs-recursive">iteration VS recursive</h1>
+<blockquote>
+<p>我们知道，循环在一定程度上可以等价于递归，但是两者在使用场景仍有区别</p>
+</blockquote>
+<ol>
+<li>iteration: 当在数组中遍历时，一般采用此种方法；</li>
+<li>recursive的本质是寻找更小的子集，所以此种方法更适用于linked list，因为array的特性是通过下表访问而无法分别表示数组中的两个子数组，而linked list则不一样，可以通过不同头尾指针的设定确定新的list</li>
+</ol>
+<h1 id="多指针问题">多指针问题</h1>
+<ol>
+<li>多指针问题多用于划分区域，可起到挡板的作用</li>
+<li>在循环体内的控制条件，一般用 &lt;=， 而不用 !=, 因为有可能一次移动两个位置使得指针永远不想等从而越界</li>
+<li>经典二分问题，其循环体内也是&lt;=, mid = left + (right - left) / 2，即最后left = right； 但是二分的变种不一定保证其循环体内的控制条件，有可能是&lt;，即left与right差一个元素的位置, 要根据题目意思来定；</li>
+</ol>
+<h1 id="java有用的api">Java有用的API</h1>
+<ol>
+<li>表示 double(0.0, 1.0]的随机数，Math.random()</li>
+<li>数组容量不够需要扩充数组，此时需要数组的复制操作<pre><code> if (size == array.length) {
+         array = Arrays.copyOf(array, (int)(array.length * 1.5));
+     }
+</code></pre>
+</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Sorting Problems]]></title>
+        <id>https://cui36.github.io/post/sorting-problems/</id>
+        <link href="https://cui36.github.io/post/sorting-problems/">
+        </link>
+        <updated>2022-08-09T00:08:24.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="selection-sort">Selection Sort</h1>
+<blockquote>
+<p>典型的n^2算法，注意外层遍历循环的时候到n-1结束</p>
+</blockquote>
+<pre><code>public class Solution {
+  public int[] solve(int[] array) {
+    for (int i = 0; i &lt; array.length - 1; i++) { // iteration times
+      int globalMin = i;
+      for (int j = i + 1; j &lt; array.length; j++) { // find the K-least element each time
+        if (array[j] &lt; array[globalMin]) globalMin = j;
+      }
+      // swap
+      int temp = array[i];
+      array[i] = array[globalMin];
+      array[globalMin] = temp;
+    }
+    return array;
+  }
+}
+</code></pre>
+<h1 id="merge-sort">Merge Sort</h1>
+<blockquote>
+<p>典型的n*logn算法，其分为两部分:<br>
+1）divide<br>
+time = 1 + 2 + 4 + ... + n / 2；第一层将array分为两次，第二层分为4次...<br>
+2）conquer<br>
+time = n * logn；当divide完成，left是单个元素，每次conquer后会给left增加新的元素。每次divide到最小元素后就conquer,<br>
+3）space = stack + heap = recursion_level + extra space = logn + (n/2 + n/4 + ... + 1) = O(n)</p>
+</blockquote>
+<pre><code>import java.util.Arrays;
+
+public class MergeSort {
+    public int[] mergeSort(int[] array) {
+        if (array == null || array.length &lt;= 1) return array;
+        return mergeSort(array, 0, array.length - 1);
+    }
+    private int[] mergeSort(int[] array, int left, int right) {
+        if (left == right) return new int[]{array[left]};
+        // recursive rule
+        int mid = left + (right - left) / 2;
+        int[] leftResult = mergeSort(array, left, mid);
+        int[] rightResult = mergeSort(array, mid + 1, right);
+        return merge(leftResult, rightResult);
+    }
+    public int[] merge(int[] leftResult, int[] rightResult) {
+        int[] result = new int[leftResult.length + rightResult.length];
+        int leftIndex = 0;
+        int rightIndex = 0;
+        int resultIndex = 0;
+        while (leftIndex &lt; leftResult.length &amp;&amp; rightIndex &lt; rightResult.length) {
+            if (leftResult[leftIndex] &lt;= rightResult[rightIndex]) {
+                result[resultIndex++] = leftResult[leftIndex++];
+            }
+            else {
+                result[resultIndex++] = rightResult[rightIndex++];
+            }
+        }
+        while (leftIndex &lt; leftResult.length) {
+            result[resultIndex++] = leftResult[leftIndex++];
+        }
+        while (rightIndex &lt; rightResult.length) {
+            result[resultIndex++] = rightResult[rightIndex++];
+        }
+        return result;
+    }
+    public static void main(String[] args) {
+        MergeSort solution = new MergeSort();
+        int[] array = null;
+        array = new int[] {3,5,1,2,4};
+        array = solution.mergeSort(array);
+        System.out.println(Arrays.toString(array));
+    }
+}
+</code></pre>
+<h2 id="举一反二">举一反二</h2>
+<blockquote>
+<p>Merge Sort for Linked List: As slow random access performance, other sorting method is impossible.<br>
+1）headRef to the head pointer, and it needs to be changed if the head node is not the smallest one.<br>
+2）divide the linked list to two halves a &amp; b<br>
+3）MergeSort(a) &amp;&amp; MergeSort(b)<br>
+4）Merge the Sorted a,b and update the head pointer: headRef = SortedMerge(a, b)</p>
+</blockquote>
+<pre><code>// 核心代码：
+public node mergeSort(node h) {
+        // base case
+        if (h == null || h.next == null) {
+            return h;
+        }
+        // recursive
+        node middle = getMiddle(h);
+        node nexttomiddle = middle.next;
+        middle.next = null;
+        node leftMerge = mergeSort(h);
+        node rightMerge = mergeSort(nexttomiddle);
+        return merge(leftMerge, rightMerge);
+    }
+    public node getMiddle(node h) {
+        if (h == null) {
+            return h;
+        }
+        node slow = h, fast = h;
+        while (fast.next != null &amp;&amp; fast.next.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        return slow;
+    }
+    node merge(node left, node right) {
+        node result = null;
+        if (left == null) return right;
+        if (right == null) return left;
+        if (left.val &lt;= right.val) {
+            result = left;
+            result.next = merge(left.next, right);
+        } else {
+            result = right;
+            result.next = merge(left, right.next);
+        }
+        return result;
+    }
+</code></pre>
+<h2 id="举一反三">举一反三</h2>
+<blockquote>
+<p>convert {A, 1, B, 2, C, 3} to {A, B, C, 1, 2, 3}<br>
+😵目前想到的是在merge函数中new两个数组，分别增加，然后再合并</p>
+</blockquote>
+<h1 id="quick-sort">Quick Sort</h1>
+<blockquote>
+<p>算法流程<br>
+1）选取pivot，并且与最后一个元素进行位置互换；<br>
+2）左右双指针，将左指针比pivot大的元素与右指针比pivpt小的元素互换；<br>
+3）两个挡板，三个区域，[0, i) 比pivot小的数，[i, j]尚未探索区域,(j, n-1]比pivot大的数，分别递归<br>
+capacity:<br>
+1）worst time:<br>
+2）average time:</p>
+</blockquote>
+<pre><code>    public int[] quickSort(int[] array) {
+        if (array == null || array.length == 0) {
+            return array;
+        }
+        quickSort(array, 0, array.length - 1);
+        return array;
+    }
+    public void quickSort(int[] array, int left, int right) {
+        if (left &gt;= right) return;
+        // recursive
+        int pivotIndex = partition(array, left, right);
+        quickSort(array, left, pivotIndex - 1);
+        quickSort(array, pivotIndex + 1, right);
+
+    }
+    public int partition(int[] array, int left, int right) {
+        int pivotIndex = pivotIndex(left, right);
+        int pivot = array[pivotIndex];
+        // swap the pivot element to the latest
+        swap(array, pivotIndex, right);
+        int leftBd = left;
+        int rightBd = right - 1;
+        while (leftBd &lt;= rightBd) {
+            if (array[leftBd] &lt; pivot) {
+                leftBd ++;
+            } else if (array[rightBd] &gt; pivot) {
+                rightBd --;
+            } else {
+                swap(array, leftBd ++, rightBd --);
+            }
+        }
+        swap(array, leftBd, right);
+        return leftBd;
+    }
+    private int pivotIndex(int left, int right) {
+        return left + (int)Math.random() * (right - left + 1);
+    }
+    private void swap(int[] array, int a, int b) {
+        int temp = array[a];
+        array[a] = array[b];
+        array[b] = temp;
+    }
+</code></pre>
+]]></content>
+    </entry>
+</feed>

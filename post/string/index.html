@@ -1,0 +1,481 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>String | Gridea</title>
+<link rel="shortcut icon" href="https://cui36.github.io/favicon.ico?v=1664167399664">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cui36.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="String | Gridea - Atom Feed" href="https://cui36.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="
+往往需要两个index来完成操作
+
+De-duplication
+SubString
+judge whether string A is string B's substring
+
+Robin Carb: if we can hash t..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://cui36.github.io">
+  <img class="avatar" src="https://cui36.github.io/images/avatar.png?v=1664167399664" alt="">
+  </a>
+  <h1 class="site-title">
+    Gridea
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              String
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-09-10
+              </span>
+              <span>
+                9 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <blockquote>
+<p>往往需要两个index来完成操作</p>
+</blockquote>
+<h1 id="de-duplication">De-duplication</h1>
+<h1 id="substring">SubString</h1>
+<h2 id="judge-whether-string-a-is-string-bs-substring">judge whether string A is string B's substring</h2>
+<blockquote>
+<p>Robin Carb: if we can hash the short string to a unique integer, the we can just compare each substring of s1's hashed value -&gt; O(m * n) -&gt; O(n)，之所以会降低，是因为将原来的字符串逐位匹配换成了滚动哈希算法，只需要计算头一个hash值，便可知道后续字符串的hash值<br>
+<img src="https://cui36.github.io/post-images/1663459182111.png" alt="" loading="lazy"></p>
+</blockquote>
+<pre><code>public int strstr(String large, String small) {
+       if (large.length() &lt; small.length()) return -1;
+       int targetHashValue = moduleHash(small);
+       int seedHashValue = moduleHash(large.substring(0, small.length()));
+       for (int i = 0; i &lt;= large.length() - small.length(); i++) {
+           if (seedHashValue == targetHashValue) {
+               for (int j = 0; j &lt; small.length(); j++) {
+                   if (large.charAt(i + j) != small.charAt(j)) {
+                       break;
+                   }
+                   return i; // note
+               }
+           }
+           if (i &lt; large.length() - small.length()) {
+               seedHashValue = ((seedHashValue - (large.charAt(i) - 'a') * (26 ^ (small.length() - 1) % 101)) * 26 + (large.charAt(i + small.length()) - 'a')) % 101;  // note
+               if (seedHashValue &lt; 0) {  // note
+                   seedHashValue += 101;
+               }
+           }
+       }
+       return -1;
+   }
+   public int moduleHash(String a) {
+       char[] temp = a.toCharArray();
+       int result = 0;
+       int size = temp.length - 1;
+       for (int i = 0; i &lt; temp.length; i++) {
+           result = (result * 26 + (a.charAt(i) - 'a')) % 101;
+       }
+       return result;
+   }
+</code></pre>
+<h1 id="reversal">Reversal</h1>
+<h2 id="字符串反转">字符串反转</h2>
+<p>定义一前一后两个index，交换，i &lt; j; 时间复杂度O(n)</p>
+<pre><code>public void reverse(char[] input, int start, int end) {
+        if (input.length &lt;= 1) {
+            return;
+        }
+        while (start &lt; end) {
+            swap(input, start++, end --);
+        }
+    }
+    public void swap(char[] array, int i, int j) {
+        char temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+</code></pre>
+<h2 id="整体反转但举步不动">整体反转但举步不动</h2>
+<blockquote>
+<p>I love yahoo trick -&gt; yahoo love I</p>
+</blockquote>
+<ol>
+<li>先整体反转</li>
+<li>在局部反转</li>
+</ol>
+<pre><code>public String reverseWords(String input) {
+        if (input == null || input.length() &lt;= 1) return input;
+        // reverse the whole string
+        char[] array = input.toCharArray(); // note
+        reverse(array, 0, input.length() - 1);
+        int start = 0;
+        // reverse the words separated
+        for (int i = 0; i &lt; input.length(); i++) {
+            char temp = array[i];
+            if (temp != ' ' &amp;&amp; (i == 0 || array[i - 1] == ' ')) {
+                start = i;
+            }
+            if (temp != ' ' &amp;&amp; (i == input.length() - 1 || array[i + 1] == ' ')) { // note
+                reverse(array, start, i);
+            }
+        }
+        return new String(array);
+    }
+</code></pre>
+<h2 id="char-shuffling">char shuffling</h2>
+<blockquote>
+<p>ABCDEFG1234567 -&gt; A1B2C3D4E5F6G7<br>
+朴素的做法是利用mergesort，不过我们也可以利用I love yahoo trick, time = O(nlogn), 将字符串分为四个区域，首先是前一半是字符，后一半是字母；然后是在前后两部分中再一分为二；所以现在是A、B、1、2四个区域，首先对B、1两个区域做trick，为A、1、B、2，然后在分别递归调用A1，B2，注意参数；直到right和left挨着结束</p>
+</blockquote>
+<pre><code>public char[] shuffling(char[] array) {
+       // 分为4个区域
+        int left = 0;
+        int right = array.length - 1;
+        convert(array, left, right);
+        return array;
+    }
+    public void convert(char[] array, int left, int right) {
+        if (right - left &lt;= 1) {
+            return;
+        }
+        int size = right - left + 1;
+        int mid = left + size / 2;
+        int leftMid = left + size / 4;
+        int rightMid = mid + size / 4;
+        reverse(array, leftMid, rightMid - 1);
+        reverse(array, leftMid, mid - 1);
+        reverse(array, mid, rightMid - 1);
+
+        convert(array, left, left + 2 * (leftMid - left) - 1); // -1是因为要将后一位变为当前位,对于左半部分递归
+        convert(array,left + 2 * (leftMid - left), right);
+    }
+</code></pre>
+<h1 id="char-remove">Char Remove</h1>
+<blockquote>
+<p>abc -&gt; (2) -&gt; bca<br>
+借鉴上一道题的做法，将字符串按照移动步数考虑成两部分然后I love yahoo trick</p>
+</blockquote>
+<h1 id="permutationuse-dfs">Permutation(use DFS)</h1>
+<p>&quot;abc&quot; -&gt; [abc, acb, bac, bca, cab, cba]</p>
+<pre><code>// 输出字符串的所有排列，且其有重复元素
+    public void permutation(char[] input, int index) {
+        if (index == input.length) { // base case
+            System.out.println(input);
+            return;
+        }
+        Set&lt;Character&gt; fixElementInThisLevel = new HashSet&lt;&gt;();
+        for (int i = index; i &lt; input.length; i++) {
+            if (fixElementInThisLevel.contains(input[i])) {
+                continue;
+            }
+            fixElementInThisLevel.add(input[i]);
+            swap(input, index, i);
+            permutation(input, index + 1);
+            swap(input, index, i);
+        }
+    }
+</code></pre>
+<h1 id="decodingencoding">Decoding/encoding</h1>
+<p>&quot;aaaaabbbc&quot; -&gt; &quot;a5b3c1&quot;</p>
+<blockquote>
+<p>注意事项：两次循环，第一遍将数组中出现次数大于等于两次的letter和及出现次数抄录下来，注意其出现次数可能超过一位数，所以对出现次数从后往前记录，比如23，先记录3，再记录2；然后出现一次的letter只记录字母；两者的length都要相应记录；<br>
+第二次循环处理只有字母的letter，加‘1’<img src="https://cui36.github.io/post-images/1663896634485.png" alt="" loading="lazy"></p>
+</blockquote>
+<pre><code>static private String compress(String input) {
+        // corner case
+        if (input == null || input.isEmpty()) {
+            return null;
+        }
+        char[] array = input.toCharArray();
+        // step1: deal with the cases that adjacent letter &gt;= 2
+        int fast = 0, slow = 0, newLength = 0;
+        while (fast &lt; array.length) {
+            int begin = fast;
+            while (fast &lt; array.length &amp;&amp; array[fast] == array[begin]) {
+                fast++;
+            }
+            array[slow++] = array[begin]; // 每次循环开始前先复制字符
+            if (fast - begin == 1) {
+                newLength += 2;  // a 1,一共两个字符，而且不变
+            } else {
+                int len = copyDigits(array, slow, fast - begin); // 计算大于2的字符数，返回其长度
+                slow += len; //  slow现在是最后一个位置的后一位
+                newLength += len + 1; // 数字位数 + 一个字符
+            }
+        }
+        // step2: deal with the single letter
+        char[] result = new char[newLength];
+        fast = slow - 1;
+        slow = newLength - 1;
+        while (fast &gt;= 0) {
+            if (Character.isDigit(array[fast])) {
+                while (fast &gt;= 0 &amp;&amp; Character.isDigit(array[fast])) {
+                    result[slow--] = array[fast--];
+                }
+            } else {
+                result[slow--] = '1';
+            }
+            result[slow--] = array[fast--];
+        }
+        return new String(result);
+    }
+    static public int copyDigits(char[] input, int index, int count) {
+        int len = 0;
+        for (int i = count; i &gt; 0 ; i /= 10) {
+            index++;
+            len++;
+        }
+        for (int i = count; i &gt; 0 ; i /= 10) {
+            int digit = i % 10;
+            input[--index] = (char) ('0' + digit);
+        }
+        return len;
+    }
+</code></pre>
+<blockquote>
+<p>如果是逆过程，注意处理0的情况</p>
+</blockquote>
+<h1 id="longest-substring">Longest substring</h1>
+<p>最长无重复字符的子序列：abcdea -&gt; abcde -&gt; 5</p>
+<blockquote>
+<p>采用滑动窗口的思想，设立slow，fast两个指针，每次遇见set中不包含的字符，则移动slow指针；遇见set中包含的字符，删去字符并移动slow</p>
+</blockquote>
+<pre><code>public int longest(String input) {
+        if (input == null || input.isEmpty()) {
+            return -1;
+        }
+        Set&lt;Character&gt; window = new HashSet&lt;&gt;();
+        int slow = 0, fast = 0, longest = 0;
+        while (fast &lt; input.length()) {
+            // if 出现重复的字符，删除第一个，并向后移动slow指针
+            if (window.contains(input.charAt(fast))) {
+                window.remove(input.charAt(slow++));
+            } else { // 若不然，滑动fast指针使其包含最远的字符
+                window.add(input.charAt(fast++));
+                longest = Math.max(longest, fast - slow);
+            }
+        }
+        return longest;
+    }
+</code></pre>
+<h1 id="matching">Matching</h1>
+<h2 id="allanagrams">allAnagrams</h2>
+<p>l = &quot;abcbac&quot;, s = &quot;ab&quot;, return [0, 3]</p>
+<blockquote>
+<p>为了使得时间复杂是O(n),此题仍采用滑动窗口来解决问题，并且不同于native的做法，我们将Map的值设为还缺多少个该字母，每次遇见新的，就将其值-1，match++；当当前指针超过lo字符串长度时，我们将进行窗口的移动，此时将窗口最左侧字符的map值+1，match--；每次循环结束如果match == map.size(),说明找到一个有效配对</p>
+</blockquote>
+<pre><code>static public List&lt;Integer&gt; allAnagrams(String sh, String lo) {
+        List&lt;Integer&gt; result = new ArrayList&lt;&gt;();
+        // corner case
+        if (lo == null || lo.length() == 0) {
+            return result;
+        }
+        if (lo.length() &lt; sh.length()) {
+            return result;
+        }
+        Map&lt;Character, Integer&gt; map = countMap(sh);
+        int match = 0;
+        for (int i = 0; i &lt; lo.length(); i++) {
+            char tmp = lo.charAt(i);
+            Integer count = map.get(tmp);
+            if (i &gt;= sh.length()) {
+                tmp = lo.charAt(i - sh.length());
+                count = map.get(tmp);
+                if (count != null) {
+                    map.put(tmp, count + 1);
+                    if (count == 0) {
+                        match--;
+                    }
+                }
+            }
+            tmp = lo.charAt(i);
+            count = map.get(tmp);
+            if (count != null) {
+                map.put(tmp, count - 1);
+                if (count == 1) {
+                    match++;
+                }
+            }
+
+            if (match == map.size()) {
+                result.add(i - sh.length() + 1);
+            }
+        }
+        return result;
+    }
+    static public Map&lt;Character, Integer&gt; countMap(String s) {
+        Map&lt;Character, Integer&gt; map = new HashMap&lt;&gt;();
+        for (char ch : s.toCharArray()) {
+            Integer count = map.get(ch);
+            if (count == null) {
+                map.put(ch, 1);
+            } else {
+                map.put(ch, ++count);
+            }
+        }
+        return map;
+    }
+</code></pre>
+<h2 id="longestconsecutiveones">longestConsecutiveOnes</h2>
+<p>flip 0s at index 2 and 3, then the array becomes [1,1,1,1,1,1,1,0,0,0], so that the length of longest subarray that contains only integer 1 is 7.</p>
+<blockquote>
+<p>High level: 对于每一个可能的window的fast index，是的slow与fast之间的字母不超过k个zero，找到最远的slow更新fast - slow + 1</p>
+</blockquote>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#de-duplication">De-duplication</a></li>
+<li><a href="#substring">SubString</a>
+<ul>
+<li><a href="#judge-whether-string-a-is-string-bs-substring">judge whether string A is string B's substring</a></li>
+</ul>
+</li>
+<li><a href="#reversal">Reversal</a>
+<ul>
+<li><a href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%8F%8D%E8%BD%AC">字符串反转</a></li>
+<li><a href="#%E6%95%B4%E4%BD%93%E5%8F%8D%E8%BD%AC%E4%BD%86%E4%B8%BE%E6%AD%A5%E4%B8%8D%E5%8A%A8">整体反转但举步不动</a></li>
+<li><a href="#char-shuffling">char shuffling</a></li>
+</ul>
+</li>
+<li><a href="#char-remove">Char Remove</a></li>
+<li><a href="#permutationuse-dfs">Permutation(use DFS)</a></li>
+<li><a href="#decodingencoding">Decoding/encoding</a></li>
+<li><a href="#longest-substring">Longest substring</a></li>
+<li><a href="#matching">Matching</a>
+<ul>
+<li><a href="#allanagrams">allAnagrams</a></li>
+<li><a href="#longestconsecutiveones">longestConsecutiveOnes</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://cui36.github.io/post/san-ren-xing-bi-you-wo-shi/">
+              <h3 class="post-title">
+                三人行，必有我师
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://cui36.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,359 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sorting Problems | Gridea</title>
+<link rel="shortcut icon" href="https://cui36.github.io/favicon.ico?v=1664167399664">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cui36.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Sorting Problems | Gridea - Atom Feed" href="https://cui36.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Selection Sort
+
+典型的n^2算法，注意外层遍历循环的时候到n-1结束
+
+public class Solution {
+  public int[] solve(int[] array) {
+    for (int i =..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://cui36.github.io">
+  <img class="avatar" src="https://cui36.github.io/images/avatar.png?v=1664167399664" alt="">
+  </a>
+  <h1 class="site-title">
+    Gridea
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Sorting Problems
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-08-08
+              </span>
+              <span>
+                5 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h1 id="selection-sort">Selection Sort</h1>
+<blockquote>
+<p>典型的n^2算法，注意外层遍历循环的时候到n-1结束</p>
+</blockquote>
+<pre><code>public class Solution {
+  public int[] solve(int[] array) {
+    for (int i = 0; i &lt; array.length - 1; i++) { // iteration times
+      int globalMin = i;
+      for (int j = i + 1; j &lt; array.length; j++) { // find the K-least element each time
+        if (array[j] &lt; array[globalMin]) globalMin = j;
+      }
+      // swap
+      int temp = array[i];
+      array[i] = array[globalMin];
+      array[globalMin] = temp;
+    }
+    return array;
+  }
+}
+</code></pre>
+<h1 id="merge-sort">Merge Sort</h1>
+<blockquote>
+<p>典型的n*logn算法，其分为两部分:<br>
+1）divide<br>
+time = 1 + 2 + 4 + ... + n / 2；第一层将array分为两次，第二层分为4次...<br>
+2）conquer<br>
+time = n * logn；当divide完成，left是单个元素，每次conquer后会给left增加新的元素。每次divide到最小元素后就conquer,<br>
+3）space = stack + heap = recursion_level + extra space = logn + (n/2 + n/4 + ... + 1) = O(n)</p>
+</blockquote>
+<pre><code>import java.util.Arrays;
+
+public class MergeSort {
+    public int[] mergeSort(int[] array) {
+        if (array == null || array.length &lt;= 1) return array;
+        return mergeSort(array, 0, array.length - 1);
+    }
+    private int[] mergeSort(int[] array, int left, int right) {
+        if (left == right) return new int[]{array[left]};
+        // recursive rule
+        int mid = left + (right - left) / 2;
+        int[] leftResult = mergeSort(array, left, mid);
+        int[] rightResult = mergeSort(array, mid + 1, right);
+        return merge(leftResult, rightResult);
+    }
+    public int[] merge(int[] leftResult, int[] rightResult) {
+        int[] result = new int[leftResult.length + rightResult.length];
+        int leftIndex = 0;
+        int rightIndex = 0;
+        int resultIndex = 0;
+        while (leftIndex &lt; leftResult.length &amp;&amp; rightIndex &lt; rightResult.length) {
+            if (leftResult[leftIndex] &lt;= rightResult[rightIndex]) {
+                result[resultIndex++] = leftResult[leftIndex++];
+            }
+            else {
+                result[resultIndex++] = rightResult[rightIndex++];
+            }
+        }
+        while (leftIndex &lt; leftResult.length) {
+            result[resultIndex++] = leftResult[leftIndex++];
+        }
+        while (rightIndex &lt; rightResult.length) {
+            result[resultIndex++] = rightResult[rightIndex++];
+        }
+        return result;
+    }
+    public static void main(String[] args) {
+        MergeSort solution = new MergeSort();
+        int[] array = null;
+        array = new int[] {3,5,1,2,4};
+        array = solution.mergeSort(array);
+        System.out.println(Arrays.toString(array));
+    }
+}
+</code></pre>
+<h2 id="举一反二">举一反二</h2>
+<blockquote>
+<p>Merge Sort for Linked List: As slow random access performance, other sorting method is impossible.<br>
+1）headRef to the head pointer, and it needs to be changed if the head node is not the smallest one.<br>
+2）divide the linked list to two halves a &amp; b<br>
+3）MergeSort(a) &amp;&amp; MergeSort(b)<br>
+4）Merge the Sorted a,b and update the head pointer: headRef = SortedMerge(a, b)</p>
+</blockquote>
+<pre><code>// 核心代码：
+public node mergeSort(node h) {
+        // base case
+        if (h == null || h.next == null) {
+            return h;
+        }
+        // recursive
+        node middle = getMiddle(h);
+        node nexttomiddle = middle.next;
+        middle.next = null;
+        node leftMerge = mergeSort(h);
+        node rightMerge = mergeSort(nexttomiddle);
+        return merge(leftMerge, rightMerge);
+    }
+    public node getMiddle(node h) {
+        if (h == null) {
+            return h;
+        }
+        node slow = h, fast = h;
+        while (fast.next != null &amp;&amp; fast.next.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        return slow;
+    }
+    node merge(node left, node right) {
+        node result = null;
+        if (left == null) return right;
+        if (right == null) return left;
+        if (left.val &lt;= right.val) {
+            result = left;
+            result.next = merge(left.next, right);
+        } else {
+            result = right;
+            result.next = merge(left, right.next);
+        }
+        return result;
+    }
+</code></pre>
+<h2 id="举一反三">举一反三</h2>
+<blockquote>
+<p>convert {A, 1, B, 2, C, 3} to {A, B, C, 1, 2, 3}<br>
+😵目前想到的是在merge函数中new两个数组，分别增加，然后再合并</p>
+</blockquote>
+<h1 id="quick-sort">Quick Sort</h1>
+<blockquote>
+<p>算法流程<br>
+1）选取pivot，并且与最后一个元素进行位置互换；<br>
+2）左右双指针，将左指针比pivot大的元素与右指针比pivpt小的元素互换；<br>
+3）两个挡板，三个区域，[0, i) 比pivot小的数，[i, j]尚未探索区域,(j, n-1]比pivot大的数，分别递归<br>
+capacity:<br>
+1）worst time:<br>
+2）average time:</p>
+</blockquote>
+<pre><code>    public int[] quickSort(int[] array) {
+        if (array == null || array.length == 0) {
+            return array;
+        }
+        quickSort(array, 0, array.length - 1);
+        return array;
+    }
+    public void quickSort(int[] array, int left, int right) {
+        if (left &gt;= right) return;
+        // recursive
+        int pivotIndex = partition(array, left, right);
+        quickSort(array, left, pivotIndex - 1);
+        quickSort(array, pivotIndex + 1, right);
+
+    }
+    public int partition(int[] array, int left, int right) {
+        int pivotIndex = pivotIndex(left, right);
+        int pivot = array[pivotIndex];
+        // swap the pivot element to the latest
+        swap(array, pivotIndex, right);
+        int leftBd = left;
+        int rightBd = right - 1;
+        while (leftBd &lt;= rightBd) {
+            if (array[leftBd] &lt; pivot) {
+                leftBd ++;
+            } else if (array[rightBd] &gt; pivot) {
+                rightBd --;
+            } else {
+                swap(array, leftBd ++, rightBd --);
+            }
+        }
+        swap(array, leftBd, right);
+        return leftBd;
+    }
+    private int pivotIndex(int left, int right) {
+        return left + (int)Math.random() * (right - left + 1);
+    }
+    private void swap(int[] array, int a, int b) {
+        int temp = array[a];
+        array[a] = array[b];
+        array[b] = temp;
+    }
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#selection-sort">Selection Sort</a></li>
+<li><a href="#merge-sort">Merge Sort</a>
+<ul>
+<li><a href="#%E4%B8%BE%E4%B8%80%E5%8F%8D%E4%BA%8C">举一反二</a></li>
+<li><a href="#%E4%B8%BE%E4%B8%80%E5%8F%8D%E4%B8%89">举一反三</a></li>
+</ul>
+</li>
+<li><a href="#quick-sort">Quick Sort</a></li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://cui36.github.io/post/recursion/">
+              <h3 class="post-title">
+                Recursion
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://cui36.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

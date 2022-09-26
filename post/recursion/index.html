@@ -1,0 +1,456 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Recursion | Gridea</title>
+<link rel="shortcut icon" href="https://cui36.github.io/favicon.ico?v=1664167399664">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cui36.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Recursion | Gridea - Atom Feed" href="https://cui36.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Understanding
+Coding Frame
+
+Function calls itself with a decrease chain, n -&gt; n-1 -&gt; n-2 ..., boil down a big prob..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://cui36.github.io">
+  <img class="avatar" src="https://cui36.github.io/images/avatar.png?v=1664167399664" alt="">
+  </a>
+  <h1 class="site-title">
+    Gridea
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Recursion
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-08-06
+              </span>
+              <span>
+                9 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h1 id="understanding">Understanding</h1>
+<h2 id="coding-frame">Coding Frame</h2>
+<ol>
+<li>Function calls itself with a decrease chain, n -&gt; n-1 -&gt; n-2 ..., boil down a big problems to small ones</li>
+<li>implenmentation:<br>
+a) Base case: 函数的最终归宿 &amp;&amp; 进入function后要不要停下,smallest problem to solve<br>
+b) Recusrion rule: what is left to do for N-Problem to smaller ones if it can be resolved. (what should we do at the current level)</li>
+</ol>
+<h2 id="complexity">Complexity</h2>
+<ol>
+<li>Time: Sum of all nodes</li>
+<li>Space: A path from the low to highest,一条直上直下的路径所有节点的空间复杂度之和</li>
+</ol>
+<blockquote>
+<p><em>1. Space等于recursion tree的层数或者高度吗？</em><br>
+不等于，因为有可能每一层节点的空间复杂度不一样，e.g.<br>
+<em>2. 那等于所有节点空间复杂度之和吗？</em><br>
+不等于，只计算直上直下的路径</p>
+</blockquote>
+<h2 id="recursion-tree">Recursion Tree</h2>
+<blockquote>
+<p>与Tree结合的问题常常涉及到recursion</p>
+</blockquote>
+<ol>
+<li>每一个Node代表一个  recursion call</li>
+<li>时间复杂度要看recursion tree中发生了多少事,一般是branch ^ level</li>
+<li>空间复杂度要看recursion tree里直上直下的Path<br>
+(1) corner case: root == null; 如果没有问题，最后都会递归到null的状态<br>
+(2) base case：可视的操作</li>
+<li>其大致分为两类用法<br>
+(1) value从上往下传递，然后结果从下往上返回：BST的判定<pre><code>public boolean isBSTHelper(TreeNode root, int min, int max) {
+     if (root == null) return true;
+     if (min &gt; root.key || max &lt; root.key) {
+         return false;
+     }
+     return isBSTHelper(root.left, min, root.key) &amp;&amp; isBSTHelper(root.right, root.key, max);
+ }
+</code></pre>
+(2) 只把value从下往上传递（更常见）<pre><code>// 判断高度
+public int findHeight(TreeNode root) {
+     if (root == null) return 0;
+     return Math.max(findHeight(root.left), findHeight(root.right)) + 1;
+ }
+ // 是否平衡
+ public boolean isBalanced(TreeNode root) {
+     // corner case
+     if (root == null) return true;
+     // base case
+     int leftHeight = findHeight(root.left);
+     int rightHeight = findHeight(root.right);
+     if (Math.abs(leftHeight - rightHeight) &gt; 1) {
+         return false;
+     }
+     return isBalanced(root.left) &amp;&amp; isBalanced(root.right);
+ }
+</code></pre>
+</li>
+</ol>
+<h1 id="与1d和2d-array的结合">与1D和2D Array的结合</h1>
+<h2 id="1d-array二分法较为常见">1D Array：二分法较为常见</h2>
+<ol>
+<li>MergeSort</li>
+<li>QuickSort</li>
+</ol>
+<h2 id="2d-array">2D Array</h2>
+<h3 id="spiral-order-1-按照螺旋顺序打印正方形矩阵">Spiral Order 1 : 按照螺旋顺序打印正方形矩阵</h3>
+<figure data-type="image" tabindex="1"><img src="https://cui36.github.io/post-images/1664167398029.png" alt="" loading="lazy"></figure>
+<h3 id="spiral-order-2-按照螺旋顺序打印矩形矩阵">Spiral Order 2: 按照螺旋顺序打印矩形矩阵</h3>
+<h3 id="n皇后">N皇后</h3>
+<p>注意到一个现象：在做recursion的题目时一般要另写一个helper函数，其中参数包含result和控制递归的参数变量，而且其返回值是void</p>
+<blockquote>
+<p>此种解题方式之所以会有更少的时间复杂度O(N!),是因为每一次检查是O(1)的时间，而之所以是O(1)是因为每次都会去boolean中寻找列，对角线，逆对角线</p>
+</blockquote>
+<pre><code>public List&lt;List&lt;Integer&gt;&gt; nqueens(int n) {
+        List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;();
+        int [] cur = new int [n];
+        boolean [] usedColumn = new boolean[n];
+        boolean [] usedDiagonal = new boolean[2 * n - 1];
+        boolean [] usedReversedDiagonal = new boolean[2 * n - 1];
+        helper(n, 0, cur, res, usedColumn, usedDiagonal, usedReversedDiagonal);
+        return res;
+    }
+    public void helper(int n, int row, int[] cur, List&lt;List&lt;Integer&gt;&gt; res, boolean [] usedColumn, boolean [] usedDiagonal, boolean [] usedReversedDiagonal) {
+        // base case
+        if (row == n) { // 当所有row的皇后都排完
+            res.add(toList(cur));
+            return ;
+        }
+        for (int i = 0; i &lt; n; i++) {
+            if (valid(n, row, i, usedColumn, usedDiagonal, usedReversedDiagonal)) {
+                mark(n, row, i, usedColumn, usedDiagonal, usedReversedDiagonal);
+                cur[row] = i;
+                helper(n, row + 1, cur, res, usedColumn, usedDiagonal, usedReversedDiagonal);
+                unmark(n, row, i, usedColumn, usedDiagonal, usedReversedDiagonal);
+            }
+        }
+    }
+    public boolean valid(int n, int row, int column, boolean [] usedColumn, boolean [] usedDiagonal, boolean [] usedReversedDiagonal) {
+        return !usedColumn[column] &amp;&amp; !usedDiagonal[row + column] &amp;&amp; !usedReversedDiagonal[row - column + n - 1];
+    }
+    public void mark(int n, int row, int column, boolean [] usedColumn, boolean [] usedDiagonal, boolean [] usedReversedDiagonal) {
+        usedColumn[column] = true;
+        usedDiagonal[row + column] = true;
+        usedReversedDiagonal[row - column + n - 1] = true;
+    }
+    public void unmark(int n, int row, int column, boolean [] usedColumn, boolean [] usedDiagonal, boolean [] usedReversedDiagonal) {
+        usedColumn[column] = false;
+        usedDiagonal[row + column] = false;
+        usedReversedDiagonal[row - column + n - 1] = false;
+    }
+public List&lt;Integer&gt; toList(int [] cur) {
+        List&lt;Integer&gt; res = new ArrayList&lt;&gt;();
+        for (int i = 0; i &lt; cur.length; i++) {
+            res.add(cur[i]);
+        }
+        return res;
+    }
+</code></pre>
+<h1 id="与linkedlist的结合">与LinkedList的结合</h1>
+<h2 id="reverse-linkedlist-by-pair">reverse linkedlist by pair</h2>
+<blockquote>
+<p>先看不递归的做法，注意核心代码几行的顺序不能改变，需要先将cur移动，然后a跨过b连接c，然后bc之间连接断开，b的下一个指针指向a，最后更新cur到a，也就是此时的第二个位置</p>
+</blockquote>
+<pre><code>static public ListNode reverseInPairs(ListNode head) {
+        ListNode pre = new ListNode(0);
+        pre.next = head;
+        ListNode cur = pre;
+        while (cur.next != null &amp;&amp; cur.next.next != null) {
+            ListNode a = cur.next;
+            ListNode b = cur.next.next;
+            cur.next = b; // 移动pre.next到下一个元素位置
+            a.next = b.next;
+            b.next = a;
+            cur = a;
+        }
+        return pre.next;
+    }
+</code></pre>
+<blockquote>
+<p>如果使用递归做法就会方便许多<br>
+<img src="https://cui36.github.io/post-images/1663994849222.png" alt="" loading="lazy"></p>
+</blockquote>
+<pre><code>static public ListNode reverseInPairs(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode newHead = head.next;
+        ListNode N3 = head.next.next;
+        newHead.next = head;
+        head.next = reverseInPairs(N3);
+        return newHead;
+    }
+</code></pre>
+<h2 id="reverse-tree">reverse Tree</h2>
+<p>利用递归的思想，将root的左子树看成一个整体</p>
+<pre><code>public TreeNode reverse(TreeNode root) {
+        if (root == null || root.left == null) {
+            return root;
+        }
+        TreeNode newRoot = reverse(root.left);
+        root.left.right = root.right;
+        root.left.left = root;
+        root.left = null;
+        root.right = null;
+        return newRoot;
+    }
+</code></pre>
+<h2 id="字符串匹配">字符串匹配</h2>
+<p>student = s5t<br>
+<img src="https://cui36.github.io/post-images/1664003614112.png" alt="" loading="lazy"></p>
+<pre><code>public boolean match(String input, String pattern) {
+        // base case
+        if (input.length() == 0 &amp;&amp; pattern.length() == 0) {
+            return true;
+        } else if (input.length() == 0 || pattern.length() == 0) {
+            return false;
+        }
+        // recursive rule
+        if (Character.isLetter(pattern.charAt(0))) { // case1: if pattern[0] is a letter
+            if (input.charAt(0) != pattern.charAt(0)) {
+                return false;
+            } else {
+                return match(input.substring(1), pattern.substring(1));
+            }
+        } else { // case2: if it is a figit
+            int i = 0;
+            int num = 0;
+            while (i &lt; pattern.length() &amp;&amp; Character.isDigit(pattern.charAt(i))) {
+                num = num * 10 + (pattern.charAt(i) - '0');
+                i ++;
+            }
+            if (num &gt; input.length()) {
+                return false;
+            } else {
+                return match(input.substring(num), pattern.substring(i));
+            }
+        }
+    }
+</code></pre>
+<h1 id="与tree结合">与Tree结合</h1>
+<p>是Recursion最常见也是最常考的题型</p>
+<ol>
+<li>what do you expect from your lchild / rchild ?  usually return type of the recrsion function -&gt; the height of subtree</li>
+<li>what do you want to do at the current layer? e.g. myHeight = max(left, right) + 1</li>
+<li>what do you want to report your parent? e.g. return myHeight</li>
+</ol>
+<blockquote>
+<p>从下往上返回值</p>
+</blockquote>
+<pre><code># 计算左子树的节点个数
+public int numsNodes(TreeNodeLeft root) {
+    // base case
+    if (root == null) {
+      return 0;
+    }
+    // recursive role
+    int leftNum = numsNodes(root.left);
+    int rightNum = numsNodes(root.right);  // 注意右子树也需要计算，且递归方式与左子树一样，因为定义了base case，所以其实计算右子树就是不断向上返回数值
+    root.numNodesLeft = leftNum;
+    return leftNum + rightNum + 1;
+  }
+# 计算左子树和右子树最大的差值
+public int maxDiffLeftAndRight(TreeNode root) {
+        int[] globalMax = {0};
+        TreeNode[] sol = null;
+        subtreeNode(root, globalMax, sol);
+        return globalMax[0];
+    }
+    public int subtreeNode(TreeNode root, int[] globalMax, TreeNode[] sol) {
+        if (root == null) return 0;
+        // step 1
+        int leftTotal = subtreeNode(root.left, globalMax, sol);
+        int rightTotal = subtreeNode(root.right, globalMax, sol);
+        // step 2: current level
+        if (Math.abs(leftTotal - rightTotal) &gt; globalMax[0]) {
+            globalMax[0] = Math.abs(leftTotal - rightTotal);
+            sol[0] = root;
+        }
+        return leftTotal + rightTotal + 1;
+    }
+</code></pre>
+<p>最经典题型：Lowest Common Ancestor(LCA)</p>
+<pre><code>// 分情况讨论 O（n）
+public TreeNode lowestCommonAncestor(TreeNode root, TreeNode one, TreeNode two) {
+        if (root == null) {
+            return null;
+        }
+        if (root == one || root == two) {
+            return root;
+        }
+        TreeNode ll = lowestCommonAncestor(root.left, one, two);
+        TreeNode lr = lowestCommonAncestor(root.right, one, two);
+        // one two 没有相互隶属关系，就返回两者最近的共同根节点
+        if (ll != null &amp;&amp; lr != null) {
+            return root;
+        }
+        // 有相互隶属关系，如果两个方向都是null，则代表one two都是null，返回null；如果一个方向是null，则返回另一个方向的根节点即可；
+        return ll == null ? lr : ll;
+    }
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#understanding">Understanding</a>
+<ul>
+<li><a href="#coding-frame">Coding Frame</a></li>
+<li><a href="#complexity">Complexity</a></li>
+<li><a href="#recursion-tree">Recursion Tree</a></li>
+</ul>
+</li>
+<li><a href="#%E4%B8%8E1d%E5%92%8C2d-array%E7%9A%84%E7%BB%93%E5%90%88">与1D和2D Array的结合</a>
+<ul>
+<li><a href="#1d-array%E4%BA%8C%E5%88%86%E6%B3%95%E8%BE%83%E4%B8%BA%E5%B8%B8%E8%A7%81">1D Array：二分法较为常见</a></li>
+<li><a href="#2d-array">2D Array</a>
+<ul>
+<li><a href="#spiral-order-1-%E6%8C%89%E7%85%A7%E8%9E%BA%E6%97%8B%E9%A1%BA%E5%BA%8F%E6%89%93%E5%8D%B0%E6%AD%A3%E6%96%B9%E5%BD%A2%E7%9F%A9%E9%98%B5">Spiral Order 1 : 按照螺旋顺序打印正方形矩阵</a></li>
+<li><a href="#spiral-order-2-%E6%8C%89%E7%85%A7%E8%9E%BA%E6%97%8B%E9%A1%BA%E5%BA%8F%E6%89%93%E5%8D%B0%E7%9F%A9%E5%BD%A2%E7%9F%A9%E9%98%B5">Spiral Order 2: 按照螺旋顺序打印矩形矩阵</a></li>
+<li><a href="#n%E7%9A%87%E5%90%8E">N皇后</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E4%B8%8Elinkedlist%E7%9A%84%E7%BB%93%E5%90%88">与LinkedList的结合</a>
+<ul>
+<li><a href="#reverse-linkedlist-by-pair">reverse linkedlist by pair</a></li>
+<li><a href="#reverse-tree">reverse Tree</a></li>
+<li><a href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%8C%B9%E9%85%8D">字符串匹配</a></li>
+</ul>
+</li>
+<li><a href="#%E4%B8%8Etree%E7%BB%93%E5%90%88">与Tree结合</a></li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://cui36.github.io/post/chang-yong-shu-ju-jie-gou/">
+              <h3 class="post-title">
+                Java常用数据结构
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://cui36.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

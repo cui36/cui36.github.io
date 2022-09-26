@@ -1,0 +1,392 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Graph | Gridea</title>
+<link rel="shortcut icon" href="https://cui36.github.io/favicon.ico?v=1664167399664">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cui36.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Graph | Gridea - Atom Feed" href="https://cui36.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Graph核心思想总结
+
+how to represent a Graph
+a. 邻接矩阵 / 邻接表
+b. List&lt;List&gt;
+How to model a problem to graph problem: 构建点和边的关..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://cui36.github.io">
+  <img class="avatar" src="https://cui36.github.io/images/avatar.png?v=1664167399664" alt="">
+  </a>
+  <h1 class="site-title">
+    Gridea
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Graph
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-08-27
+              </span>
+              <span>
+                7 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h1 id="graph核心思想总结">Graph核心思想总结</h1>
+<ol>
+<li>how to represent a Graph<br>
+a. 邻接矩阵 / 邻接表<br>
+b. List&lt;List<Integer>&gt;</li>
+<li>How to model a problem to graph problem: 构建点和边的关系</li>
+<li>key problem：traverse this graph by some way</li>
+<li>How many ways?</li>
+<li>考虑核心：去重</li>
+</ol>
+<h1 id="graph-search">Graph Search</h1>
+<pre><code>class GrapgNode {
+    int value;
+    string name;
+    ...
+    List&lt;GraphNode&gt; neighbors; 
+}
+</code></pre>
+<h2 id="bfs1">BFS1</h2>
+<blockquote>
+<p>适用问题：分层打印，同层关系<br>
+expand and generate,且每个node只能被poll一次且仅一次（可以用Hashset记录），不能重新generate<br>
+数据结构：Queue</p>
+</blockquote>
+<ol>
+<li>initial state(root)</li>
+<li>expand a node, poll, visit, print ...</li>
+<li>generate nodes: reach out to its neighboring nodes</li>
+<li>deduplicate: expand and generate for only once</li>
+</ol>
+<pre><code>（层序遍历）
+public List&lt;List&lt;Integer&gt;&gt; layerByLayer(TreeNode root) {
+        List&lt;List&lt;Integer&gt;&gt; result = new ArrayList&lt;List&lt;Integer&gt;&gt;();
+        if (root == null) return result;
+        Queue&lt;TreeNode&gt; helper = new LinkedList&lt;&gt;();
+        helper.offer(root);
+        // result.add(root.key);
+        while (!helper.isEmpty()) {
+            int size = helper.size();  // 每行的元素
+            List&lt;Integer&gt; layerNode = new ArrayList&lt;&gt;();
+            for (int i = 0; i &lt; size; i++) {
+                TreeNode curr = helper.poll();
+                if (curr.left != null) {
+                    helper.offer(curr.left);
+                }
+                if (curr.right != null) {
+                    helper.offer(curr.right);  // note! 是curr不是root
+                }
+                layerNode.add(curr.key);
+            }
+            result.add(layerNode);
+        }
+        return result
+</code></pre>
+<blockquote>
+<p>可以看出，如果有的例题需要利用BFS，先创建一个Queue，然后while循环条件是不为空，循环体内根据条件选择何时加入、何时poll队列中元素</p>
+</blockquote>
+<pre><code>// 判断是否是完全二叉树
+public boolean isCompleted(TreeNode root) {
+        if (root == null) return true; // null 和 单节点
+        boolean flag = false;  // flag代表any of its child is empty
+        Queue&lt;TreeNode&gt; dfs = new LinkedList&lt;&gt;();
+        dfs.offer(root);
+        while (!dfs.isEmpty()) {
+            TreeNode curr = dfs.poll();
+            if (curr.left == null) {
+                flag = true;
+            } else if (flag) { // 如果左子树不为空，且flag为空，代表之前层[1,n）有空的，不满足定义。注意我们是先判断的左子树，如果是该节点或之后节点有空子树将在之后判断，不满足这个if条件；
+                return false; 
+            } else {
+                dfs.offer(curr.left);
+            }
+            if (curr.right == null) {
+                flag = true;
+            } else if (flag) { // 右子树存在，但之前层有空的
+                return false;
+            } else {
+                dfs.offer(curr.right);
+            }
+        }
+        return true;
+    }
+// full true: 不能有度为1的节点
+while (!dfs.isEmpty()) {
+            TreeNode curr = dfs.poll();
+            if (curr.left == null) {
+                if (curr.right != null) {
+                    return false;
+                }
+            } else {
+                if (curr.right == null) {
+                    return false;
+                } else {
+                    dfs.offer(curr.left);
+                    dfs.offer(curr.right);
+                }
+            }
+        }
+</code></pre>
+<h2 id="best-first-search">Best First Search</h2>
+<blockquote>
+<p>适用问题：shortest path, min/max k elements<br>
+input a node, output the shortest path to all the rest nodes(点到面的算法) e.g. 北京到所有其他城市最短距离<br>
+数据结构：Priority Queue(与BFS唯一的区别，而且BFS一般要更遍历结束，但是BFS2不一定要将所有元素遍历完，如果不要遍历完，就直接for循环就好了，循环次数是除去循环外的一次后的k - 1)</p>
+</blockquote>
+<ol>
+<li>initial state: start node，有可能是数组第一个位置</li>
+<li>node expand and generate role, cost(node) = cost(parent node) + c(parent of node, node)
+<blockquote>
+<p>maintain a hashset &lt;'GraphNode'&gt; to mark whether the nodes has been generate before</p>
+</blockquote>
+</li>
+<li>end condition，所有点都遍历，即p_queue变空</li>
+<li>Dijkstra's algrothim property:<br>
+a. one node can be only expand once<br>
+b. one node can be generated more than once(re-caculate cost)<br>
+c. all the pop costs are non-decreasing<br>
+d. time complexity = O(E*logV)<br>
+e. when a node is poped out for expansion, the value is fixed from the start node</li>
+<li>deduplicate is important in this question: 一般方法是定义一个boolean[][] visited, 如果generated我们就将其中对应位置的元素设为true，而且在每次将新元素加入队列前需要判断是不是true</li>
+</ol>
+<pre><code>// 寻找数组中第k小的元素，且数组从左到右递增，从上到下递增
+public static class Cell {
+        int row;
+        int column;
+        int value;
+
+        Cell(int row, int column, int value) {
+            this.row = row;
+            this.column = column;
+            this.value = value;
+        }
+    }
+    public int kthSmallest(int[][] matrix, int k) {
+        int rows = matrix.length;
+        int columns = matrix[0].length;
+        PriorityQueue&lt;Cell&gt; minHeap = new PriorityQueue&lt;Cell&gt;(k, new Comparator&lt;Cell&gt;() { // 创建新的数据结构
+            @Override
+            public int compare(Cell o1, Cell o2) {
+                if (o1.value == o2.value) return 0;
+                return o1.value &lt; o2.value ? -1 : 1;
+            }
+        });
+        // set generated cell to justify whether it is generated before
+        boolean[][] visited = new boolean[rows][columns];
+        minHeap.offer(new Cell(0, 0, matrix[0][0]));
+        visited[0][0] = true;
+        for (int i = 0; i &lt; k - 1; i++) {
+            Cell cur = minHeap.poll();  // pop one element from at most 2* k p-queue, O(log2k)
+            // add its neighbors
+            // if not boundary &amp;&amp; if not generated before
+            if (cur.row + 1 &lt; rows &amp;&amp; !visited[cur.row + 1][cur.column]) {
+                minHeap.offer(new Cell(cur.row + 1, cur.column, matrix[cur.row + 1][cur.column])); // O(log2k)
+                visited[cur.row + 1][cur.column] = true;
+            }
+            if (cur.column + 1 &lt; columns &amp;&amp; !visited[cur.row][cur.column + 1]) {
+                minHeap.offer(new Cell(cur.row, cur.column + 1, matrix[cur.row][cur.column + 1]));
+                visited[cur.row][cur.column + 1] = true;
+            }
+        }
+        return minHeap.peek().value;
+    }
+// 时间复杂度一共是O(klogk)
+</code></pre>
+<h2 id="dfs">DFS</h2>
+<blockquote>
+<p>基本方法：画Recursion Tree</p>
+<ol>
+<li>每层代表什么意义？DFS有多少层？</li>
+<li>每层有几个状态/case？<br>
+Note：吃吐守恒定律，即回到母节点前，一定要还原成原始状态</li>
+</ol>
+</blockquote>
+<ol>
+<li>经典例题1：输出一个字符串内所有的字符排列组合方式Permutation</li>
+<li>Method: swap - swap,即每次都把一个元素固定在这一层该固定的位置上</li>
+<li>Recursion Tree: 每一层代表该固定的元素位置，[0, index] 表示固定好的区间，[index...array.length - 1]表示尚未确定位置，但是当层可以考虑被固定来的元素，index表示当层可以考虑第一个放过来的元素</li>
+</ol>
+<pre><code>public class Solution {
+  public List&lt;String&gt; permutations(String input) {
+    // Write your solution here
+    List&lt;String&gt; result = new ArrayList&lt;String&gt;(); 
+    DFS(input.toCharArray(), 0, result);
+    return result;
+  }
+  public void DFS(char[] input, int index, List&lt;String&gt; result) {
+    if (index == input.length) {
+      result.add(new String(input));
+      return;
+    }
+    for (int i = index; i &lt; input.length; i++) {
+      swap(input, index, i);
+      DFS(input, index + 1, result);
+      swap(input, index, i);
+    }
+  }
+  public void swap(char[] input, int i, int j) {
+    char tmp = input[i];
+    input[i] = input[j];
+    input[j] = tmp;
+  }
+} // O(n!)
+// 如果输入字符数组有重复元素，则可以设立一个set
+</code></pre>
+<h3 id="dfs-连通性">DFS 连通性</h3>
+<h3 id="dfs解决topological-order">DFS解决Topological order</h3>
+<h3 id="dfs解决图上的路径问题">DFS解决图上的路径问题</h3>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#graph%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3%E6%80%BB%E7%BB%93">Graph核心思想总结</a></li>
+<li><a href="#graph-search">Graph Search</a>
+<ul>
+<li><a href="#bfs1">BFS1</a></li>
+<li><a href="#best-first-search">Best First Search</a></li>
+<li><a href="#dfs">DFS</a>
+<ul>
+<li><a href="#dfs-%E8%BF%9E%E9%80%9A%E6%80%A7">DFS 连通性</a></li>
+<li><a href="#dfs%E8%A7%A3%E5%86%B3topological-order">DFS解决Topological order</a></li>
+<li><a href="#dfs%E8%A7%A3%E5%86%B3%E5%9B%BE%E4%B8%8A%E7%9A%84%E8%B7%AF%E5%BE%84%E9%97%AE%E9%A2%98">DFS解决图上的路径问题</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://cui36.github.io/post/latex-chang-yong-biao-da/">
+              <h3 class="post-title">
+                LateX常用表达式
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://cui36.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
